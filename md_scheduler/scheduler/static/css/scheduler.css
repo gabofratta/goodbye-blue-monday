@@ -1,0 +1,68 @@
+
+body {
+  padding-top: 60px;
+}
+
+@media (max-width: 979px) {
+  body {
+    padding-top: 0px;
+  }
+}
+
+.spacer20 { 
+	margin: 0; 
+	padding: 0; 
+	height: 1.2em; 
+}
+
+.spacer50 { 
+	margin: 0; 
+	padding: 0; 
+	height: 2.5em; 
+}
+
+#schedule {
+	margin-top: 2.5em;
+	margin-bottom: 1em;
+}
+
+.month {
+	border: 1px solid black;
+}
+
+.week {
+	border: 1px solid black;
+	width: 25%;
+	float: left;
+}
+
+.week_block {
+	padding: 0px !important;
+}
+
+select {
+	padding: 0.1em;
+}
+
+.selected_slots {
+	float: right;
+	width: 60%;
+	word-wrap: normal;
+}
+
+.activity {
+	padding-top: 1em;
+	padding-left: 1em;
+	padding-right: 1em;
+	background-color: lightgoldenrodyellow;
+}
+
+.activity_header {
+	padding-left: 1em;
+	padding-right: 1em;
+}
+
+.add_link {
+	padding-left: 1em;
+	padding-top: 1em;
+}
