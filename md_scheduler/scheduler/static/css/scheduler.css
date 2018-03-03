@@ -5,7 +5,7 @@ body {
 
 @media (max-width: 979px) {
   body {
-    padding-top: 0px;
+    padding-top: 50px;
   }
 }
 
@@ -22,7 +22,7 @@ body {
 }
 
 #schedule {
-	margin-top: 2.5em;
+	margin-top: 1.5em;
 	margin-bottom: 1em;
 }
 
@@ -40,15 +40,40 @@ body {
 	padding: 0px !important;
 }
 
-select {
-	padding: 0.1em;
+select.form-control {
+	padding: 0.15em !important;
 }
 
-.selected_slots {
-	float: right;
-	width: 60%;
-	word-wrap: normal;
+input.form-control {
+	padding-top: 0.35em !important;
+	padding-left: 0.25em !important;
+	padding-right: 0.15em !important;
+	padding-bottom: 0.35em !important;
 }
+
+.act_length {
+	width: 70% !important;
+	float: left;
+}
+
+.remove_activity {
+	float: right;
+}
+
+.act_slot_selector {
+	height: 4.5em;
+}
+
+/*.selected_slots {
+	float: right;
+	width: 55%;
+	word-wrap: normal;
+} */
+
+/*.act_slot_selector {
+	float: left !important;
+	width: 40% !important;
+}*/
 
 .activity {
 	padding-top: 1em;
@@ -65,4 +90,30 @@ select {
 .add_link {
 	padding-left: 1em;
 	padding-top: 1em;
+}
+
+.hidden {
+	display: none;
+}
+
+.alert-custom {
+    position: fixed !important;
+    top: 3.5em;
+    left: 0;
+    width: 100%;
+    z-index: 999;
+}
+
+.bg-teal {
+	background-color: #138496;
+}
+
+.activity_header {
+	color: #BF9B19;
+}
+
+hr {
+    color: #138496;
+    border-color: #138496;
+    background-color: #138496;
 }

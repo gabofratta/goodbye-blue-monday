@@ -11,7 +11,11 @@
 	<script>
 		$(document).ready(function() {
 
-			var activity_index = 0; // for adding lines
+			$('.close').click(function () {
+				// dismiss alert
+				$(this).closest('.alert').fadeOut();
+				return false;
+			});
 
 			$('#prev_program').click(function () {
 				//TODO
@@ -21,31 +25,81 @@
 				//TODO
 			});
 
-		    $('.slot_selector').change(function() {
+		    $('.act_slot_selector').change(function() {
 		    	// display selected slots for each activity
 		        $(this).next('.selected_slots').text($(this).val().join(", "));
 		    }); 
 
 			$('#add_activity').click(function () {
-				// add another line to the form
-				activity_index++;
-
+				// clone an activity line
 				var last_activity = $('.activity').last();
+				var new_activity = last_activity.clone(true);
 
-				last_activity.clone(true).insertAfter(last_activity);
-				
+				// reset values
+				new_activity.find("input[type='text']").val("");
+				new_activity.find("span").text("");
+				new_activity.find("select.act_slot_selector").val([]);
+
+				// add another line to the form
+				new_activity.hide();
+				new_activity.find('.remove_activity').removeClass('hidden');
+				new_activity.insertAfter(last_activity);
+				new_activity.before('<div class="act_spacer spacer20"></div>');
+				new_activity.fadeIn();
 				return false;
 			});    
 
 			$('.remove_activity').click(function () {
 				// remove current activity line
-				activity_index--;
-				$(this).closest('.activity').remove();
+				$(this).closest('.activity').fadeOut(400, function () {
+					$(this).prev('.act_spacer').remove();
+					$(this).closest('.activity').remove();
+				});
 				return false;
 			});
 
 			$('#generate').click(function () {
-				// TODO - ajax?
+				var activities = [];
+				var valid = true;		
+
+				// iterate over all activities
+				$('.activity').each(function(index) {
+					// store values
+					activities[index] = [];
+					activities[index]["code"] = $(this).find('.act_code').val();
+					activities[index]["name"] = $(this).find('.act_name').val();
+					activities[index]["category"] = $(this).find('.act_category').val();
+					activities[index]["year"] = $(this).find('.act_year').val();
+					activities[index]["slots"] = $(this).find('.act_slot_selector').val().join(", ");
+					activities[index]["_length"] = $(this).find('.act_length').val();
+
+					// validate values
+					if (activities[index]["code"] == "" || activities[index]["name"] == "" || activities[index]["category"] == null ||
+						activities[index]["year"] == null || activities[index]["slots"] == "" || activities[index]["_length"] == null) {
+						// if blank, break and report error
+						var err_msg = $('.alert-danger');
+						err_msg.find("strong").text("Fill out missing info or remove blank activities.");
+						err_msg.fadeIn();
+						valid = false;
+						return false;
+					}
+				});
+
+				// should not happen - base activity deleted
+				if (activities.length == 0) {
+					var err_msg = $('.alert-danger');
+					err_msg.find("strong").text("Reload page.");
+					err_msg.fadeIn();
+					valid = false;
+				}
+
+				if (valid) {
+					// dismiss alert - error
+					$('.alert-danger').fadeOut();
+
+					// TODO - ajax? if valid
+				}
+				console.log(activities.length)
 				return false;
 			});
 
@@ -56,7 +110,7 @@
 
 <body>
 	{# top menu #}
-	<nav class="navbar fixed-top navbar-expand-md navbar-light bg-light">
+	<nav class="navbar fixed-top navbar-expand-md navbar-dark bg-teal">
   		<div class="container">
   			<a class="navbar-brand" href="#">MS4 Planner</a>
   			<button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarCollapse" aria-controls="navbarCollapse" aria-expanded="false" aria-label="Toggle navigation">
@@ -68,14 +122,12 @@
   					<!-- active navigation link -->
   					<li class="nav-item active">
   						<a class="nav-link" href="#">Home
-  							<!-- TODO -->
   							<span class="sr-only">(current)</span>
   						</a>
   					</li>
   					<!-- regular navigation link -->
   					<li class="nav-item">
-  						<a class="nav-link" href="#">About</a>
-  						<!-- TODO -->
+  						<a class="nav-link" href="./about">About</a>
   					</li>
   				</ul>
   			</div>
@@ -84,12 +136,12 @@
 
 	<main role="main" class="container">
 		{# alerts #}
-		<div class="alert alert-success alert-dismissable fade show" role="alert">
-				<a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a>
+		<div class="alert alert-success alert-custom hidden" role="alert">
+				<a href="#" class="close">&times;</a>
 				<strong>Success!</strong>
 		</div>
-		<div class="alert alert-danger alert-dismissable fade show" role="alert">
-				<a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a>
+		<div class="alert alert-danger alert-custom hidden" role="alert">
+				<a href="#" class="close">&times;</a>
 				<strong>Error!</strong>
 		</div>
 
@@ -173,14 +225,16 @@
 			<div class="col-md-2">
 			</div>
 			<div class="col-md-6">
-				<a href="#" id="prev_program">Previous</a>
+				<a href="#" id="prev_program">&larr; Previous</a>
 			</div>
 			<div class="col-md-4">
-				<a href="#" id="next_program">Next</a>
+				<a href="#" id="next_program">Next &rarr;</a>
 			</div>
 		</div>
 
-		<div class="spacer50"></div>
+		<div class="spacer20"></div>
+		<hr>
+		<div class="spacer20"></div>
 
 		{# data entry section #}
 		<div class="container">
@@ -199,9 +253,9 @@
 					<h5>Year</h5>
 				</div>
 				<div class="col-md-2 mb-2">
-					<h5>Slots</h5>
+					<h5>Starting weeks</h5>
 				</div>
-				<div class="col-md-1 mb-2">
+				<div class="col-md-2 mb-2">
 					<h5>Length</h5>
 				</div>
 			</div>
@@ -210,13 +264,13 @@
 			<div class="activity">
 				<div class="row">
 					<div class="col-md-1 mb-4">
-						<input type="text" id="code_0" style="width:90%;">
+						<input type="text" class="act_code form-control" style="width:100%;">
 					</div>
 					<div class="col-md-3 mb-4">
-						<input type="text" id="name_0" style="width:90%;">
+						<input type="text" class="act_name form-control" style="width:100%;">
 					</div>
 					<div class="col-md-2 mb-4">
-						<select id="category_0">
+						<select class="act_category form-control" style="width:100%;">
 							<option value="" disabled selected>Select...</option>
 						 	<option value="class">Class</option>
 						 	<option value="rotation">Rotation</option>
@@ -224,32 +278,30 @@
 						</select>
 					</div>
 					<div class="col-md-2 mb-4">
-						<select id="year_0">
+						<select class="act_year form-control" style="width:100%;">
 							<option value="" disabled selected>Select...</option>
 						 	<option value="{{ fall_year }}">{{ fall_year }}</option>
 						 	<option value="{{ spring_year }}">{{ spring_year }}</option>
 						</select>
 					</div>
 					<div class="col-md-2 mb-4">
-						<select id="slots_0" class="slot_selector" multiple>
+						<select class="act_slot_selector form-control" multiple>
 							{% for week in all_weeks %}
 								<option value="{{ week }}">{{ week }}</option>
 							{% endfor %}
 						</select>
 						<span class="selected_slots"></span>
 					</div>
-					<div class="col-md-1 mb-4">
-						<select id="length_0">
+					<div class="col-md-2 mb-4">
+						<select class="act_length form-control">
 							<option value="" disabled selected>Select...</option>
 						 	<option value="1">1</option>
 						 	<option value="2">2</option>
 						  	<option value="3">3</option>
 						  	<option value="4">4</option>
 						</select>
-					</div>
-					<div class="col-md-1 mb-4">
-						<a href="#" class="close remove_activity">&times;</a>
-					</div>
+						<a href="#" class="close remove_activity hidden">&times;</a>
+					</div>			
 				</div>
 			</div>
 
@@ -267,7 +319,7 @@
 		<div class="row">
 			<div class="col-md-5"></div>
 			<div class="col-md-2">
-				<button type="button" id="generate">Generate Schedules</button>
+				<button type="button" class="btn btn-info" id="generate">Generate Schedules</button>
 			</div>
 		</div>
 
