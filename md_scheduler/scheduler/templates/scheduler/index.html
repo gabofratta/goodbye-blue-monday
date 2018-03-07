@@ -11,6 +11,10 @@
 	<script>
 		$(document).ready(function() {
 
+
+			////////// Event handlers ///////////
+
+
 			$('.close').click(function () {
 				// dismiss alert
 				$(this).closest('.alert').fadeOut();
@@ -58,49 +62,113 @@
 				return false;
 			});
 
+			
+			////////// Form submit ///////////
+
+
 			$('#generate').click(function () {
-				var activities = [];
-				var valid = true;		
+				var activities = {};
+				var valid = true;
+
+				// dismiss success msg
+				$('.alert-success').fadeOut();
 
 				// iterate over all activities
 				$('.activity').each(function(index) {
 					// store values
-					activities[index] = [];
-					activities[index]["code"] = $(this).find('.act_code').val();
-					activities[index]["name"] = $(this).find('.act_name').val();
-					activities[index]["category"] = $(this).find('.act_category').val();
-					activities[index]["year"] = $(this).find('.act_year').val();
-					activities[index]["slots"] = $(this).find('.act_slot_selector').val().join(", ");
-					activities[index]["_length"] = $(this).find('.act_length').val();
+					activities["size"] = index + 1;
+					activities["code_" + index] = $(this).find('.act_code').val();
+					activities["name_" + index] = $(this).find('.act_name').val();
+					activities["category_" + index] = $(this).find('.act_category').val();
+					activities["term_" + index] = $(this).find('.act_term').val();
+					activities["slots_" + index] = $(this).find('.act_slot_selector').val().join(", ");
+					activities["length_" + index] = $(this).find('.act_length').val();
 
 					// validate values
-					if (activities[index]["code"] == "" || activities[index]["name"] == "" || activities[index]["category"] == null ||
-						activities[index]["year"] == null || activities[index]["slots"] == "" || activities[index]["_length"] == null) {
+					if (activities["code_" + index] == "" || activities["name_" + index] == "" || activities["category_" + index] == null ||
+						activities["term_" + index] == null || activities["slots_" + index] == "" || activities["length_" + index] == null) {
 						// if blank, break and report error
-						var err_msg = $('.alert-danger');
-						err_msg.find("strong").text("Fill out missing info or remove blank activities.");
-						err_msg.fadeIn();
+						setAlert('.alert-danger', "Fill out missing info or remove activity number " + (index + 1) + ".")
 						valid = false;
 						return false;
 					}
 				});
 
-				// should not happen - base activity deleted
-				if (activities.length == 0) {
-					var err_msg = $('.alert-danger');
-					err_msg.find("strong").text("Reload page.");
-					err_msg.fadeIn();
-					valid = false;
-				}
-
+				// data is valid
 				if (valid) {
 					// dismiss alert - error
 					$('.alert-danger').fadeOut();
+					console.log(JSON.stringify(activities));
 
-					// TODO - ajax? if valid
+					// ajax post
+					$.ajax({
+        				url: "/scheduler/ajax/generate_programs",
+				        type: "POST",
+				        data: JSON.stringify(activities),
+				        dataType: 'json',
+				        success: function(data, status) {
+					        
+						    console.log(data);
+
+					    	if (data.success) {
+					    		setAlert('.alert-success', "Your program options are ready to be viewed.");
+							} else {
+								setAlert('.alert-danger', "There are no viable programs that meet your requirements.");
+							}
+				    	},
+            			error: function(xhr, errmsg, err) {
+            				setAlert('.alert-danger', "Unexpected error. Please reload the page and try again.");
+    						console.log(err);
+						}
+					});
 				}
-				console.log(activities.length)
+
 				return false;
+			});
+
+
+			////////// Helpers ////////////
+
+			function setAlert(id, msg) {
+				var alert = $(id);
+				alert.find("strong").text(msg);
+				alert.fadeIn();
+			}
+
+
+			////////// Ajax setup //////////
+
+
+			function getCookie(name) {
+			    var cookieValue = null;
+			    if (document.cookie && document.cookie !== '') {
+			        var cookies = document.cookie.split(';');
+			        for (var i = 0; i < cookies.length; i++) {
+			            var cookie = jQuery.trim(cookies[i]);
+			            // Does this cookie string begin with the name we want?
+			            if (cookie.substring(0, name.length + 1) === (name + '=')) {
+			                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+			                break;
+			            }
+			        }
+			    }
+			    return cookieValue;
+			}
+
+			var csrftoken = getCookie('csrftoken');
+
+			function csrfSafeMethod(method) {
+				// these HTTP methods do not require CSRF protection
+				return (/^(GET|HEAD|OPTIONS|TRACE)$/.test(method));
+			}
+
+			$.ajaxSetup({
+			    crossDomain: false, // obviates need for sameOrigin test
+			    beforeSend: function(xhr, settings) {
+			        if (!csrfSafeMethod(settings.type)) {
+			            xhr.setRequestHeader("X-CSRFToken", csrftoken);
+			        }
+			    }
 			});
 
 		});
@@ -250,7 +318,7 @@
 					<h5>Category</h5>
 				</div>
 				<div class="col-md-2 mb-2">
-					<h5>Year</h5>
+					<h5>Term</h5>
 				</div>
 				<div class="col-md-2 mb-2">
 					<h5>Starting weeks</h5>
@@ -278,10 +346,10 @@
 						</select>
 					</div>
 					<div class="col-md-2 mb-4">
-						<select class="act_year form-control" style="width:100%;">
+						<select class="act_term form-control" style="width:100%;">
 							<option value="" disabled selected>Select...</option>
-						 	<option value="{{ fall_year }}">{{ fall_year }}</option>
-						 	<option value="{{ spring_year }}">{{ spring_year }}</option>
+						 	<option value="fall">Fall</option>
+						 	<option value="spring">Spring</option>
 						</select>
 					</div>
 					<div class="col-md-2 mb-4">
@@ -319,6 +387,7 @@
 		<div class="row">
 			<div class="col-md-5"></div>
 			<div class="col-md-2">
+				{% csrf_token %}
 				<button type="button" class="btn btn-info" id="generate">Generate Schedules</button>
 			</div>
 		</div>
