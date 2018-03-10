@@ -2,16 +2,13 @@ from django.shortcuts import render
 from django.http import HttpResponse
 from django.http import JsonResponse
 from scheduler.utils import program_calculator
+from scheduler.utils import weeks
 import json
 
 
 def index(request):
     context = {
-        "all_weeks" : ["May1", "May2", "May3", "May4", "Jun1", "Jun2", "Jun3", "Jun4", "Jul1", "Jul2", "Jul3", "Jul4",
-                        "Aug1", "Aug2", "Aug3", "Aug4", "Sep1", "Sep2", "Sep3", "Sep4", "Oct1", "Oct2", "Oct3", 
-                        "Oct4", "Nov1", "Nov2", "Nov3", "Nov4", "Dec1", "Dec2", "Dec3", "Dec4", "Jan1", "Jan2", 
-                        "Jan3", "Jan4", "Feb1", "Feb2", "Feb3", "Feb4", "Mar1", "Mar2", "Mar3", "Mar4", "Apr1", 
-                        "Apr2", "Apr3", "Apr4"],
+        "all_weeks" : [e.name.replace("_", " (") + ")" for e in weeks.Weeks],
         "row_1_months" : ["May", "June", "July", "August", "September", "October"],
         "row_2_months" : ["November", "December", "January", "February", "March", "April"],
         "row_3_months" : ["May", "June", "July"],

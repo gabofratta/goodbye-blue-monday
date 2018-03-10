@@ -80,13 +80,18 @@
 					activities["code_" + index] = $(this).find('.act_code').val();
 					activities["name_" + index] = $(this).find('.act_name').val();
 					activities["category_" + index] = $(this).find('.act_category').val();
-					activities["term_" + index] = $(this).find('.act_term').val();
-					activities["slots_" + index] = $(this).find('.act_slot_selector').val().join(", ");
+					activities["slots_" + index] = $(this).find('.act_slot_selector').val();
 					activities["length_" + index] = $(this).find('.act_length').val();
 
+					// process time slots
+					for (var i = 0; i < activities["slots_" + index].length; i++) {
+						activities["slots_" + index][i] = activities["slots_" + index][i].replace(" (", "_").replace(")", "");
+					}
+
 					// validate values
-					if (activities["code_" + index] == "" || activities["name_" + index] == "" || activities["category_" + index] == null ||
-						activities["term_" + index] == null || activities["slots_" + index] == "" || activities["length_" + index] == null) {
+					if (activities["code_" + index].trim() == "" || activities["name_" + index].trim() == "" || 
+						activities["category_" + index] == null || activities["slots_" + index].length == 0 || 
+						activities["length_" + index] == null) {
 						// if blank, break and report error
 						setAlert('.alert-danger', "Fill out missing info or remove activity number " + (index + 1) + ".")
 						valid = false;
@@ -98,6 +103,8 @@
 				if (valid) {
 					// dismiss alert - error
 					$('.alert-danger').fadeOut();
+
+					// remove later TODO
 					console.log(JSON.stringify(activities));
 
 					// ajax post
@@ -318,9 +325,6 @@
 					<h5>Category</h5>
 				</div>
 				<div class="col-md-2 mb-2">
-					<h5>Term</h5>
-				</div>
-				<div class="col-md-2 mb-2">
 					<h5>Starting weeks</h5>
 				</div>
 				<div class="col-md-2 mb-2">
@@ -343,13 +347,6 @@
 						 	<option value="class">Class</option>
 						 	<option value="rotation">Rotation</option>
 						  	<option value="custom">Custom</option>
-						</select>
-					</div>
-					<div class="col-md-2 mb-4">
-						<select class="act_term form-control" style="width:100%;">
-							<option value="" disabled selected>Select...</option>
-						 	<option value="fall">Fall</option>
-						 	<option value="spring">Spring</option>
 						</select>
 					</div>
 					<div class="col-md-2 mb-4">
