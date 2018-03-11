@@ -47,7 +47,7 @@ select.form-control {
 input.form-control {
 	padding-top: 0.35em !important;
 	padding-left: 0.25em !important;
-	padding-right: 0.15em !important;
+	padding-right: 0.25em !important;
 	padding-bottom: 0.35em !important;
 }
 
@@ -61,19 +61,24 @@ input.form-control {
 }
 
 .act_slot_selector {
-	height: 4.5em;
+	height: 6em;
 }
 
-/*.selected_slots {
-	float: right;
-	width: 55%;
-	word-wrap: normal;
-} */
+.selected_slots {
+	height: 6em;
+}
 
-/*.act_slot_selector {
-	float: left !important;
-	width: 40% !important;
-}*/
+textarea.form-control {
+  resize: none !important;
+  padding: 0.35em !important;
+	padding-left: 0.25em !important;
+	padding-right: 0.15em !important;
+	padding-bottom: 0.35em !important;
+}
+
+.center {
+	text-align: center;
+}
 
 .activity {
 	padding-top: 1em;
