@@ -11,7 +11,7 @@
 	<script>
 		$(document).ready(function() {
 
-
+      
 			////////// Event handlers ///////////
 
 
@@ -29,10 +29,10 @@
 				//TODO
 			});
 
-		    $('.act_slot_selector').change(function() {
-		    	// display selected slots for each activity
-		        $(this).parent().next().find('.selected_slots').val($(this).val().join("\n"));
-		    }); 
+		  $('.act_slot_selector').change(function() {
+		  	// display selected slots for each activity
+		    $(this).parent().next().find('.selected_slots').val($(this).val().join("\n"));
+		  }); 
 
 			$('#add_activity').click(function () {
 				// clone an activity line
