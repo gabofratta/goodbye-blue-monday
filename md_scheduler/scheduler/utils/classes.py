@@ -2,43 +2,57 @@ from scheduler.utils import enums
 
 
 class Activity(object):
-    """ An activity to be included in an itinerayr. It has
+    """ An activity, as imported from the frontend data. It has
     the following properties:
 
     Attributes:
         code: A string with a class code or some custom value 
         name: A string with the name of the activity
         category: "Class", "Rotation", or "Custom"
-        slot: A list of members of the Weeks enum. If instance, a single member.
+        slot: A list of members of the Weeks enum. 
         length: An integer with the length of the activity in weeks
-        isntance: Boolean indicating whether the list is an instance
     """
 
-    def __init__(self, code, name, category, slots, length, instance = False):
+    def __init__(self, code, name, category, slots, length):
         self.code = code
         self.name = name
         self.category = category
         self.slots = slots
         self.length = int(length)
-        self.instance = instance
 
     def __repr__(self):
-        # Pritn approapriate slot format
-        if self.instance:
-            slot = self.slots.name
-        else:
-            slot = ', '.join([e.name for e in self.slots])
-
         return """Activity: code is %s; name is %s; category is %s; slots are %s; 
-                  length is %s""" % (self.code, self.name, self.category, slot, self.length)      
+                  length is %s""" % (self.code, self.name, self.category, ', '.join([e.name for e in self.slots]), self.length)      
 
-    def get_instance(self, slot):
-        """ Returns an activity with a single slot, copying
-        all other parameters. """
-        if slot not in self.slots:
-            # Don't create Activity if slot is not valid
-            raise ValueError('Given slot is not an option for this acitivity.')
-        return Activity(self.code, self.name, self.category, slot, self.length, True)
+
+class Activity_Instance(Activity):
+    """ An activity instance to be included in an itinerary. It has
+    the following properties:
+
+    Attributes:
+        code: A string with a class code or some custom value 
+        name: A string with the name of the activity
+        category: "Class", "Rotation", or "Custom"
+        slot: A single member of the Weeks enum.
+        length: An integer with the length of the activity in weeks
+    """
+
+    def __init__(self, activity, slot):
+        self.code = activity.code
+        self.name = activity.name
+        self.category = activity.category
+        self.slot = slot
+        self.length = int(activity.length)
+
+    def __repr__(self):
+        return """Activity: code is %s; name is %s; category is %s; slots are %s; 
+                  length is %s""" % (self.code, self.name, self.category, self.slot.name, self.length)
+
+    def export(self):
+        """ Returns the Activity's info as a dict, to be exported
+        to the frontend """
+        return {"code" : self.code, "name" : self.name, "category" : self.category, 
+                "slots" : [self.slot.value + i for i in range(self.length)]}
 
 
 class Itinerary(object):
@@ -76,5 +90,5 @@ class Itinerary(object):
 
         # Add all of the activity's weeks to blackout dict
         for i in range(activity.length):
-            key = (activity.slots.value + i)
+            key = (activity.slot.value + i)
             self.blackouts[key] = True

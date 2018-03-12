@@ -22,21 +22,38 @@ body {
 }
 
 #schedule {
-    margin-top: 1.5em;
+    margin-top: 1em;
     margin-bottom: 1em;
 }
 
 .month {
-    border: 1px solid black;
+    border: 1px solid white;
+    background-color: lightblue;
+    border-radius: 0.4em;
 }
 
 .week {
-    border: 1px solid black;
+    border: 1px solid white;
     width: 25%;
     float: left;
+    background-color: lightgoldenrodyellow;
+    border-radius: 0.4em;
+}
+
+.activity_display {
+    border: 1px solid white;
+    width: 25%;
+    float: left;
+    overflow-wrap: break-word;
+	background-color: #eceff1;
+    border-radius: 0.4em;
 }
 
 .week_block {
+    padding: 0px !important;
+}
+
+.activity_block {
     padding: 0px !important;
 }
 
@@ -80,6 +97,10 @@ textarea.form-control {
     text-align: center;
 }
 
+.right {
+    text-align: right !important;
+}
+
 .activity {
     padding-top: 1em;
     padding-left: 1em;
@@ -90,6 +111,7 @@ textarea.form-control {
 .activity_header {
     padding-left: 1em;
     padding-right: 1em;
+    color: #BF9B19;
 }
 
 .add_link {
@@ -113,12 +135,62 @@ textarea.form-control {
     background-color: #138496;
 }
 
-.activity_header {
-    color: #BF9B19;
+.bg-light-gray {
+	background-color: #eceff1;
 }
 
 hr {
     color: #138496;
     border-color: #138496;
     background-color: #138496;
+}
+
+.copy_program {
+	display: inline;
+	float: right;
+}
+
+.txt-w {
+	color: white !important;
+}
+
+.loading {
+    width: 100%;
+    height: 100%;
+    position: fixed;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    background-color: rgba(0,0,0,.5);
+    z-index: 1040;
+}
+
+.loading-wheel {
+    width: 20px;
+    height: 20px;
+    margin-top: -40px;
+    margin-left: -40px;
+    
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    
+    border-width: 30px;
+    border-radius: 50%;
+    -webkit-animation: spin 1s linear infinite;
+}
+
+.style-2 .loading-wheel {
+    border-style: double;
+    border-color: #ccc transparent;
+}
+
+@-webkit-keyframes spin {
+    0% {
+        -webkit-transform: rotate(0);
+    }
+    100% {
+        -webkit-transform: rotate(-360deg);
+    }
 }

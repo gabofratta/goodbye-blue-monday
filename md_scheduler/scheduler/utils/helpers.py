@@ -1,9 +1,11 @@
 from scheduler.utils import enums
 from scheduler.utils import classes
+from datetime import datetime
 import copy
 
 
-def get_schedules_json(data):
+def get_schedules(data):
+    timeout = 10 # in seconds
     activity_list = []
     itinerary_list = []
 
@@ -23,13 +25,22 @@ def get_schedules_json(data):
         # Make itinerary for each activity slot
         for slot in activity.slots:
             itinerary = classes.Itinerary()
-            itinerary.add_activity(activity.get_instance(slot))
+            instance = classes.Activity_Instance(activity, slot)
+            itinerary.add_activity(instance)
             itinerary_list.append(itinerary)
+
+    # Prevent infinite looping
+    t1 = datetime.now()
 
     # Iterate over remaining activities
     while len(activity_list) > 0:
         activity = activity_list.pop()
         itinerary_count = len(itinerary_list)
+
+        # Check timeout
+        if (datetime.now() - t1).seconds > timeout:
+            return {"success" : False, "error" : "Operation timed out."}
+
         # For each itinerary
         for i in range(itinerary_count):
             itinerary = itinerary_list.pop(0)
@@ -38,15 +49,16 @@ def get_schedules_json(data):
                 # If no conflict, add activity w/ time slot to itinerary
                 if not itinerary.has_conflict(slot, activity.length):
                     itinerary_copy = copy.deepcopy(itinerary)
-                    itinerary_copy.add_activity(activity.get_instance(slot))
+                    instance = classes.Activity_Instance(activity, slot)
+                    itinerary_copy.add_activity(instance)
                     itinerary_list.append(itinerary_copy)
 
     # Prepare return array
-    ret_val = {"success" : len(itinerary_list) > 0, "size" : len(itinerary_list)}
+    ret_val = {"success" : True, "size" : len(itinerary_list)}
 
-    for itinerary in itinerary_list:
-        print(itinerary)
-    print("len" + str(len(itinerary_list)))
+    # Add itineraries w/ activities to return array
+    for i in range(len(itinerary_list)):
+        ret_val["itinerary_" + str(i)] = [e.export() for e in itinerary_list[i].activities]
 
     return ret_val
 
