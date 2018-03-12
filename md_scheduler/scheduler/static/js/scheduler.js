@@ -233,12 +233,12 @@ $(document).ready(function() {
             // set alert text and fade in
             alert.find("strong").text(msg);
             alert.fadeIn();
-        })
+        });
      
         // flash alert
         // alert.fadeTo("slow", 1, function () {
         //     $(this).delay(2000).fadeOut("slow");
-        // })
+        // });
     }
 
     function showItinerary(index) {        
