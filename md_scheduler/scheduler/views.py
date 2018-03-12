@@ -24,7 +24,7 @@ def index(request):
 def generate_programs(request):
     # check request type
     if request.method != "POST":
-        return JsonResponse({"success": False, "error" : "Unexpected reqeust."})
+        return JsonResponse({"success": False, "error" : "Unexpected request."})
 
     # get request data
     params = json.loads(request.body)
