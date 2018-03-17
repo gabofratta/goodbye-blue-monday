@@ -9,12 +9,11 @@ import json
 def index(request):
     context = {
         "all_weeks" : [e.name.replace("_", " (") + ")" for e in enums.Weeks],
-        "row_1_months" : ["May - Fall", "June - Fall", "July - Fall"],
-        "row_2_months" : ["August - Fall", "September - Fall", "October - Fall"],
-        "row_3_months" : ["November - Fall", "December - Fall", "January - Spring"],
-        "row_4_months" : ["February - Spring", "March - Spring", "April - Spring"],
-        "row_5_months" : ["May - Spring", "June - Spring", "July - Spring"],
-        "row_months" : [1, 2, 3],
+        "row_1_months" : [[1, "May - Fall"], [2, "June - Fall"], [3, "July - Fall"]],
+        "row_2_months" : [[1, "August - Fall"], [2, "September - Fall"], [3, "October - Fall"]],
+        "row_3_months" : [[1, "November - Fall"], [2, "December - Fall"], [3, "January - Spring"]],
+        "row_4_months" : [[1, "February - Spring"], [2, "March - Spring"], [3, "April - Spring"]],
+        "row_5_months" : [[1, "May - Spring"], [2, "June - Spring"], [3, "July - Spring"]],
         "row_weeks"  : [1, 2, 3, 4], 
     }
 

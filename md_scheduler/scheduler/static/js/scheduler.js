@@ -4,6 +4,9 @@ $(document).ready(function() {
     ////////// Globals ///////////
 
 
+    // hammer element on schedule table for mobile swipe events
+    var hammer = new Hammer(document.getElementById('schedule'), {});
+    var device = $(window).width() > 810 ? '.content-desktop' : '.content-mobile';
     var weeks_per_row = 12;
     var weeks_per_month = 4;
     var itinerary_index = null;
@@ -25,10 +28,46 @@ $(document).ready(function() {
         return false;
     });
 
+
+    // only register swipe events on mobile
+    if (device == '.content-mobile') {
+        hammer.on('swiperight', function() {
+            // Show error if no schedules
+            if (itinerary_count == 0) {
+                return false;
+            }
+
+            // Decrease itinerary index w/ loop around
+            if (itinerary_index == 0) {
+                itinerary_index = itinerary_count - 1;
+            } else {
+                itinerary_index--;
+            }
+
+            // Show new itinerary
+            showItinerary(itinerary_index);
+            return false;
+        });
+
+       hammer.on('swipeleft', function() {
+            // Show error if no schedules
+            if (itinerary_count == 0) {
+                return false;
+            }
+
+            // Increase itinerary index w/ loop around
+            itinerary_index = (itinerary_index + 1) % itinerary_count;
+
+            // Show new itinerary
+            showItinerary(itinerary_index);
+            return false;
+        });
+    }
+
     $('.prev_program').click(function () {
         // Show error if no schedules
         if (itinerary_count == 0) {
-            setAlert('.alert-danger', "No schedules to display.");
+            setAlert('.alert-danger', "You must generate some schedules first.");
             return false;
         }
 
@@ -47,7 +86,7 @@ $(document).ready(function() {
     $('.next_program').click(function () {
         // Show error if no schedules
         if (itinerary_count == 0) {
-            setAlert('.alert-danger', "No schedules to display.");
+            setAlert('.alert-danger', "You must generate some schedules first.");
             return false;
         }
 
@@ -60,31 +99,31 @@ $(document).ready(function() {
     });
 
     $('.copy_program').click(function () {
-    	// Show error if no schedules
+        // Show error if no schedules
         if (itinerary_count == 0) {
-            setAlert('.alert-danger', "No schedules to copy.");
+            setAlert('.alert-danger', "You must generate some schedules first.");
             return false;
         }
 
-    	var text = "";
-    	var activities = itineraries[itinerary_index];
-    	var slot_opts = $('.act_slot_selector').last().children();
+        var text = "";
+        var activities = itineraries[itinerary_index];
+        var slot_opts = $('.act_slot_selector').last().children();
 
-    	// Build program text
-    	for (var j = 0; j < activities.length; j++) {
-    		var line = activities[j].code + " - " + activities[j].name + " - " + activities[j].category + ": ";
-    		for (var k = 0; k < activities[j].slots.length; k++) {
-    			var week = slot_opts.eq(activities[j].slots[k] - 1).text();
-    			line += (week + ", ");
-    		}
-    		text += (line.substring(0, line.length - 2) + "\n");
-    	}
+        // Build program text
+        for (var j = 0; j < activities.length; j++) {
+            var line = activities[j].code + " - " + activities[j].name + " - " + activities[j].category + ": ";
+            for (var k = 0; k < activities[j].slots.length; k++) {
+                var week = slot_opts.eq(activities[j].slots[k] - 1).text();
+                line += (week + ", ");
+            }
+            text += (line.substring(0, line.length - 2) + "\n");
+        }
 
-    	// Copy text to clipboard
-    	copyToClipboard(text);
+        // Copy text to clipboard
+        copyToClipboard(text);
 
-    	// Flash success alert
-    	setAlert('.alert-success', "Schedule copied to clipboard.");
+        // Flash success alert
+        setAlert('.alert-success', "Schedule copied to clipboard.");
         return false;
     });
 
@@ -95,7 +134,7 @@ $(document).ready(function() {
 
     $('#add_activity').click(function () {
         // clone an activity line
-        var last_activity = $('.activity').last();
+        var last_activity = $(device).find('.activity').last();
         var new_activity = last_activity.clone(true);
 
         // reset values
@@ -138,12 +177,12 @@ $(document).ready(function() {
         itineraries = [];
 
         // reset program panel
-        $('.program_index').text('');
-        $('#schedule').find('[class*=cell_]').text('');
-        $('#schedule').find('[class*=cell_]').addClass('hidden');
+        $('.program_index').html('&nbsp;');
+        $('#schedule').find(device).find('[class*=cell_]').text('');
+        $('#schedule').find(device).find('[class*=cell_]').addClass('hidden');
 
         // iterate over all activities
-        $('.activity').each(function(index) {
+        $(device).find('.activity').each(function(index) {
             // store values
             activities["size"] = index + 1;
             activities["code_" + index] = $(this).find('.act_code').val();
@@ -241,12 +280,14 @@ $(document).ready(function() {
         // });
     }
 
-    function showItinerary(index) {        
+    function showItinerary(index) {
+        var schedule_table = $('#schedule').find(device);
+
         // Clear calendar
-        $('#schedule').find('[class*=cell_]').text('');
-        $('#schedule').find('[class*=cell_]').removeClass('hidden');
-        $('#schedule').find('[class*=cell_]').css({"background-color" : "", "color" : ""});
-        $('#schedule').find('[class*=cell_]').height('auto');
+        schedule_table.find('[class*=cell_]').text('');
+        schedule_table.find('[class*=cell_]').removeClass('hidden');
+        schedule_table.find('[class*=cell_]').css({"background-color" : "", "color" : ""});
+        schedule_table.find('[class*=cell_]').height('auto');
 
         // Get itinerary
         var activities = itineraries[index];
@@ -266,7 +307,7 @@ $(document).ready(function() {
                             " (" + activities[j].category.substring(0, 2) + ")";
 
                 // Set activity text
-                var div = $('#schedule').find('.row_' + row).find('.month_' + month).find('.cell_' + cell);
+                var div = schedule_table.find('.row_' + row).find('.month_' + month).find('.cell_' + cell);
                 div.text(text);
 
                 // Set activity color
@@ -281,10 +322,10 @@ $(document).ready(function() {
         }
 
         // Update counter
-        $('.program_index').text((index + 1) + ' of ' + itinerary_count);
+        $(device).find('.program_index').text((index + 1) + ' of ' + itinerary_count);
 
         // Set activity div heights
-        $('#schedule').find('.activity_display').height(max_h + "px");
+        schedule_table.find('.activity_display').height(max_h + "px");
     }
 
     function truncate(phrase, size) {

@@ -3,10 +3,24 @@ body {
   padding-top: 60px;
 }
 
-@media (max-width: 979px) {
+@media only screen and (max-width: 810px) {
   body {
     padding-top: 50px;
   }
+}
+
+.content-mobile {
+    display: none !important;
+}
+
+@media only screen and (max-width: 810px) {
+    .content-desktop {
+        display: none !important;
+    }
+
+    .content-mobile {
+        display: inline !important;
+    }
 }
 
 .spacer20 { 
@@ -101,6 +115,14 @@ textarea.form-control {
     text-align: right !important;
 }
 
+.float-r {
+    float: right;
+}
+
+.float-l {
+    float: left;
+}
+
 .activity {
     padding-top: 1em;
     padding-left: 1em;
@@ -112,6 +134,10 @@ textarea.form-control {
     padding-left: 1em;
     padding-right: 1em;
     color: #BF9B19;
+}
+
+.txt-gold {
+    color: #BF9B19
 }
 
 .add_link {
