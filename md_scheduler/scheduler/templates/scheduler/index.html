@@ -4,8 +4,9 @@
     
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="{% static 'css/scheduler.css' %}">
-    <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css">
     <script src="https://code.jquery.com/jquery-3.3.1.min.js" integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8=" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/hammer.js/2.0.8/hammer.min.js"></script>
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"></script>
     <script src="{% static 'js/scheduler.js' %}"></script>
 
@@ -53,7 +54,7 @@
         <div class="spacer20"></div>
 
         {# next, prev navigation #}
-        <div class="row">
+        <div class="row content-desktop">
             <div class="col-md-3">
             </div>
             <div class="col-md-2">
@@ -67,191 +68,338 @@
             </div>
         </div>
 
+        {# next, prev navigation #}
+        <div class="row content-mobile">
+            <div class="col-md-2 center">
+                <a href="#" class="prev_program float-l">&larr; Previous</a>
+                <span class="program_index">&nbsp;</span>
+                <a href="#" class="next_program float-r">Next &rarr;</a>
+            </div>
+        </div>
+
         {# calendar #}
         <div id="schedule">
 
-            {# row 1 months #}
-            <div class="row">
+            <div class="content-desktop">
+                {# row 1 months #}
+                <div class="row">
+                    {% for month in row_1_months %}
+                        <div class="col-md-4 month center">
+                            {{ month.1 }}
+                        </div>
+                    {% endfor %}
+                </div>
+
+                {# row 1 weeks #}
+                <div class="row">
+                    {% for month in row_1_months %}
+                        <div class="col-md-4 week_block center">
+                        {% for week in row_weeks %}
+                            <div class="week">
+                                {{ week }}
+                            </div>
+                        {% endfor %}
+                        </div>
+                    {% endfor %}    
+                </div>
+
+                {# row 1 classes #}
+                <div class="row row_1">
+                    {% for month in row_1_months %}
+                        <div class="col-md-4 activity_block center month_{{month.0}}">
+                        {% for week in row_weeks %}
+                            <div class="activity_display hidden cell_{{week}}">
+                            </div>
+                        {% endfor %}
+                        </div>
+                    {% endfor %}    
+                </div>
+
+                <div class="spacer20"></div>
+
+                {# row 2 headings #}
+                <div class="row">
+                    {% for month in row_2_months %}
+                        <div class="col-md-4 month center">
+                            {{ month.1 }}
+                        </div>
+                    {% endfor %}
+                </div>
+
+                {# row 2 weeks #}
+                <div class="row">
+                    {% for month in row_2_months %}            
+                        <div class="col-md-4 week_block center">
+                        {% for week in row_weeks %}
+                            <div class="week">
+                                {{ week }}
+                            </div>
+                        {% endfor %}
+                        </div>
+                    {% endfor %}    
+                </div>
+
+                {# row 2 classes #}
+                <div class="row row_2">
+                    {% for month in row_2_months %}
+                        <div class="col-md-4 activity_block center month_{{month.0}}">
+                        {% for week in row_weeks %}
+                            <div class="activity_display hidden cell_{{week}}">
+                            </div>
+                        {% endfor %}
+                        </div>
+                    {% endfor %}    
+                </div>
+
+                <div class="spacer20"></div>
+
+                {# row 3 headings #}
+                <div class="row">
+                    {% for month in row_3_months %}
+                        <div class="col-md-4 month center">
+                            {{ month.1 }}
+                        </div>
+                    {% endfor %}
+                </div>
+
+                {# row 3 weeks #}
+                <div class="row">
+                    {% for month in row_3_months %}            
+                        <div class="col-md-4 week_block center">
+                        {% for week in row_weeks %}
+                            <div class="week">
+                                {{ week }}
+                            </div>
+                        {% endfor %}
+                        </div>
+                    {% endfor %}    
+                </div>
+
+                {# row 3 classes #}
+                <div class="row row_3">
+                    {% for month in row_3_months %}
+                        <div class="col-md-4 activity_block center month_{{month.0}}">
+                        {% for week in row_weeks %}
+                            <div class="activity_display hidden cell_{{week}}">
+                            </div>
+                        {% endfor %}
+                        </div>
+                    {% endfor %}    
+                </div>
+
+                <div class="spacer20"></div>
+                
+                {# row 4 months #}
+                <div class="row">
+                    {% for month in row_4_months %}
+                        <div class="col-md-4 month center">
+                            {{ month.1 }}
+                        </div>
+                    {% endfor %}
+                </div>
+
+                {# row 4 weeks #}
+                <div class="row">
+                    {% for month in row_4_months %}
+                        <div class="col-md-4 week_block center">
+                        {% for week in row_weeks %}
+                            <div class="week">
+                                {{ week }}
+                            </div>
+                        {% endfor %}
+                        </div>
+                    {% endfor %}    
+                </div>
+
+                {# row 4 classes #}
+                <div class="row row_4">
+                    {% for month in row_4_months %}
+                        <div class="col-md-4 activity_block center month_{{month.0}}">
+                        {% for week in row_weeks %}
+                            <div class="activity_display hidden cell_{{week}}">
+                            </div>
+                        {% endfor %}
+                        </div>
+                    {% endfor %}    
+                </div>
+
+                <div class="spacer20"></div>
+                
+                {# row 5 months #}
+                <div class="row">
+                    {% for month in row_5_months %}
+                        <div class="col-md-4 month center">
+                            {{ month.1 }}
+                        </div>
+                    {% endfor %}
+                </div>
+
+                {# row 5 weeks #}
+                <div class="row">
+                    {% for month in row_5_months %}
+                        <div class="col-md-4 week_block center">
+                        {% for week in row_weeks %}
+                            <div class="week">
+                                {{ week }}
+                            </div>
+                        {% endfor %}
+                        </div>
+                    {% endfor %}    
+                </div>
+
+                {# row 5 classes #}
+                <div class="row row_5">
+                    {% for month in row_5_months %}
+                        <div class="col-md-4 activity_block center month_{{month.0}}">
+                        {% for week in row_weeks %}
+                            <div class="activity_display hidden cell_{{week}}">
+                            </div>
+                        {% endfor %}
+                        </div>
+                    {% endfor %}    
+                </div>
+            </div>
+
+            <div class="content-mobile">
+                {# row 1 months #}
+                
                 {% for month in row_1_months %}
-                    <div class="col-md-4 month center">
-                        {{ month }}
+                    <div class="row">
+                        <div class="col-md-4 month center">
+                            {{ month.1 }}
+                        </div>
                     </div>
+                    <div class="row">
+                        <div class="col-md-4 week_block center">
+                        {% for week in row_weeks %}
+                            <div class="week">
+                                {{ week }}
+                            </div>
+                        {% endfor %}
+                        </div>
+                    </div>
+                    <div class="row row_1">
+                        <div class="col-md-4 activity_block center month_{{month.0}}">
+                            {% for week in row_weeks %}
+                                <div class="activity_display hidden cell_{{week}}">
+                                </div> 
+                            {% endfor %}
+                        </div>
+                    </div>
+                    <div class="spacer20"></div>
                 {% endfor %}
-            </div>
 
-            {# row 1 weeks #}
-            <div class="row">
-                {% for month in row_months %}
-                    <div class="col-md-4 week_block center">
-                    {% for week in row_weeks %}
-                        <div class="week">
-                            {{ week }}
-                        </div>
-                    {% endfor %}
-                    </div>
-                {% endfor %}    
-            </div>
-
-            {# row 1 classes #}
-            <div class="row row_1">
-                {% for month in row_months %}
-                    <div class="col-md-4 activity_block center month_{{month}}">
-                    {% for week in row_weeks %}
-                        <div class="activity_display hidden cell_{{week}}">
-                        </div>
-                    {% endfor %}
-                    </div>
-                {% endfor %}    
-            </div>
-
-            <div class="spacer20"></div>
-
-            {# row 2 headings #}
-            <div class="row">
                 {% for month in row_2_months %}
-                    <div class="col-md-4 month center">
-                        {{ month }}
+                    <div class="row">
+                        <div class="col-md-4 month center">
+                            {{ month.1 }}
+                        </div>
                     </div>
+                    <div class="row">
+                        <div class="col-md-4 week_block center">
+                        {% for week in row_weeks %}
+                            <div class="week">
+                                {{ week }}
+                            </div>
+                        {% endfor %}
+                        </div>
+                    </div>
+                    <div class="row row_2">
+                        <div class="col-md-4 activity_block center month_{{month.0}}">
+                            {% for week in row_weeks %}
+                                <div class="activity_display hidden cell_{{week}}">
+                                </div> 
+                            {% endfor %}
+                        </div>
+                    </div>
+                    <div class="spacer20"></div>
                 {% endfor %}
-            </div>
 
-            {# row 2 weeks #}
-            <div class="row">
-                {% for month in row_months %}            
-                    <div class="col-md-4 week_block center">
-                    {% for week in row_weeks %}
-                        <div class="week">
-                            {{ week }}
-                        </div>
-                    {% endfor %}
-                    </div>
-                {% endfor %}    
-            </div>
-
-            {# row 2 classes #}
-            <div class="row row_2">
-                {% for month in row_months %}
-                    <div class="col-md-4 activity_block center month_{{month}}">
-                    {% for week in row_weeks %}
-                        <div class="activity_display hidden cell_{{week}}">
-                        </div>
-                    {% endfor %}
-                    </div>
-                {% endfor %}    
-            </div>
-
-            <div class="spacer20"></div>
-
-            {# row 3 headings #}
-            <div class="row">
                 {% for month in row_3_months %}
-                    <div class="col-md-4 month center">
-                        {{ month }}
+                    <div class="row">
+                        <div class="col-md-4 month center">
+                            {{ month.1 }}
+                        </div>
                     </div>
+                    <div class="row">
+                        <div class="col-md-4 week_block center">
+                        {% for week in row_weeks %}
+                            <div class="week">
+                                {{ week }}
+                            </div>
+                        {% endfor %}
+                        </div>
+                    </div>
+                    <div class="row row_3">
+                        <div class="col-md-4 activity_block center month_{{month.0}}">
+                            {% for week in row_weeks %}
+                                <div class="activity_display hidden cell_{{week}}">
+                                </div> 
+                            {% endfor %}
+                        </div>
+                    </div>
+                    <div class="spacer20"></div>
                 {% endfor %}
-            </div>
 
-            {# row 3 weeks #}
-            <div class="row">
-                {% for month in row_months %}            
-                    <div class="col-md-4 week_block center">
-                    {% for week in row_weeks %}
-                        <div class="week">
-                            {{ week }}
-                        </div>
-                    {% endfor %}
-                    </div>
-                {% endfor %}    
-            </div>
-
-            {# row 3 classes #}
-            <div class="row row_3">
-                {% for month in row_months %}
-                    <div class="col-md-4 activity_block center month_{{month}}">
-                    {% for week in row_weeks %}
-                        <div class="activity_display hidden cell_{{week}}">
-                        </div>
-                    {% endfor %}
-                    </div>
-                {% endfor %}    
-            </div>
-
-            <div class="spacer20"></div>
-            
-            {# row 4 months #}
-            <div class="row">
                 {% for month in row_4_months %}
-                    <div class="col-md-4 month center">
-                        {{ month }}
+                    <div class="row">
+                        <div class="col-md-4 month center">
+                            {{ month.1 }}
+                        </div>
                     </div>
+                    <div class="row">
+                        <div class="col-md-4 week_block center">
+                        {% for week in row_weeks %}
+                            <div class="week">
+                                {{ week }}
+                            </div>
+                        {% endfor %}
+                        </div>
+                    </div>
+                    <div class="row row_4">
+                        <div class="col-md-4 activity_block center month_{{month.0}}">
+                            {% for week in row_weeks %}
+                                <div class="activity_display hidden cell_{{week}}">
+                                </div> 
+                            {% endfor %}
+                        </div>
+                    </div>
+                    <div class="spacer20"></div>
                 {% endfor %}
-            </div>
 
-            {# row 4 weeks #}
-            <div class="row">
-                {% for month in row_months %}
-                    <div class="col-md-4 week_block center">
-                    {% for week in row_weeks %}
-                        <div class="week">
-                            {{ week }}
-                        </div>
-                    {% endfor %}
-                    </div>
-                {% endfor %}    
-            </div>
-
-            {# row 4 classes #}
-            <div class="row row_4">
-                {% for month in row_months %}
-                    <div class="col-md-4 activity_block center month_{{month}}">
-                    {% for week in row_weeks %}
-                        <div class="activity_display hidden cell_{{week}}">
-                        </div>
-                    {% endfor %}
-                    </div>
-                {% endfor %}    
-            </div>
-
-            <div class="spacer20"></div>
-            
-            {# row 5 months #}
-            <div class="row">
                 {% for month in row_5_months %}
-                    <div class="col-md-4 month center">
-                        {{ month }}
+                    <div class="row">
+                        <div class="col-md-4 month center">
+                            {{ month.1 }}
+                        </div>
                     </div>
+                    <div class="row">
+                        <div class="col-md-4 week_block center">
+                        {% for week in row_weeks %}
+                            <div class="week">
+                                {{ week }}
+                            </div>
+                        {% endfor %}
+                        </div>
+                    </div>
+                    <div class="row row_5">
+                        <div class="col-md-4 activity_block center month_{{month.0}}">
+                            {% for week in row_weeks %}
+                                <div class="activity_display hidden cell_{{week}}">
+                                </div> 
+                            {% endfor %}
+                        </div>
+                    </div>
+                    {% if month.0 != 3 %}
+                        <div class="spacer20"></div>
+                    {% endif %}
                 {% endfor %}
-            </div>
 
-            {# row 5 weeks #}
-            <div class="row">
-                {% for month in row_months %}
-                    <div class="col-md-4 week_block center">
-                    {% for week in row_weeks %}
-                        <div class="week">
-                            {{ week }}
-                        </div>
-                    {% endfor %}
-                    </div>
-                {% endfor %}    
-            </div>
-
-            {# row 5 classes #}
-            <div class="row row_5">
-                {% for month in row_months %}
-                    <div class="col-md-4 activity_block center month_{{month}}">
-                    {% for week in row_weeks %}
-                        <div class="activity_display hidden cell_{{week}}">
-                        </div>
-                    {% endfor %}
-                    </div>
-                {% endfor %}    
-            </div>
-
+            </div> 
         </div>
 
         {# next, prev navigation #}
-        <div class="row">
+        <div class="row content-desktop">
             <div class="col-md-3">
             </div>
             <div class="col-md-2">
@@ -268,71 +416,146 @@
             </div>
         </div>
 
+        {# next, prev navigation #}
+        <div class="content-mobile">
+            <div class="row">
+                <div class="col-md-2 center">
+                    <a href="#" class="prev_program float-l">&larr; Previous</a>
+                    <span class="program_index">&nbsp;</span>
+                    <a href="#" class="next_program float-r">Next &rarr;</a>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-2" style="display:flex;justify-content: center;">
+                <a role="button" class="btn btn-secondary copy_program txt-w" style="margin-top: 1em;">Copy Schedule</a>
+            </div>
+            </div>
+        </div>
+
         <div class="spacer20"></div>
         <hr>
         <div class="spacer20"></div>
 
         {# data entry section #}
         <div class="container">
-            {# section headings #}
-            <div class="row activity_header">
-                <div class="col-md-1 mb-2">
-                    <h5>Code</h5>
+            <div class="content-desktop">
+                {# section headings #}
+                <div class="row activity_header">
+                    <div class="col-md-1 mb-2">
+                        <h5>Code</h5>
+                    </div>
+                    <div class="col-md-3 mb-2">
+                        <h5>Name</h5>
+                    </div>
+                    <div class="col-md-2 mb-2">
+                        <h5>Category</h5>
+                    </div>
+                    <div class="col-md-2 mb-2">
+                        <h5>Start weeks</h5>
+                    </div>
+                    <div class="col-md-2 mb-2">
+                        <h5></h5>
+                    </div>
+                    <div class="col-md-2 mb-2">
+                        <h5>Length</h5>
+                    </div>
                 </div>
-                <div class="col-md-3 mb-2">
-                    <h5>Name</h5>
-                </div>
-                <div class="col-md-2 mb-2">
-                    <h5>Category</h5>
-                </div>
-                <div class="col-md-2 mb-2">
-                    <h5>Start weeks</h5>
-                </div>
-                <div class="col-md-2 mb-2">
-                    <h5></h5>
-                </div>
-                <div class="col-md-2 mb-2">
-                    <h5>Length</h5>
+
+                {# data inputs #}
+                <div class="activity">
+                    <div class="row">
+                        <div class="col-md-1 mb-4">
+                            <input type="text" class="act_code form-control" style="width:100%;">
+                        </div>
+                        <div class="col-md-3 mb-4">
+                            <input type="text" class="act_name form-control" style="width:100%;">
+                        </div>
+                        <div class="col-md-2 mb-4">
+                            <select class="act_category form-control" style="width:100%;">
+                                <option value="" disabled selected>Select...</option>
+                                <option value="Class">Class</option>
+                                <option value="Rotation">Rotation</option>
+                                <option value="Custom">Custom</option>
+                            </select>
+                        </div>
+                        <div class="col-md-2 mb-4">
+                            <select class="act_slot_selector form-control" multiple>
+                                {% for week in all_weeks %}
+                                    <option value="{{ week }}">{{ week }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="col-md-2 mb-4">
+                            <textarea class="form-control selected_slots" disabled></textarea>
+                        </div>
+                        <div class="col-md-2 mb-4">
+                            <select class="act_length form-control">
+                                <option value="" disabled selected>Select...</option>
+                                <option value="1">1</option>
+                                <option value="2">2</option>
+                                <option value="3">3</option>
+                                <option value="4">4</option>
+                            </select>
+                            <a href="#" class="close remove_activity hidden">&times;</a>
+                        </div>            
+                    </div>
                 </div>
             </div>
 
-            {# data inputs #}
-            <div class="activity">
-                <div class="row">
-                    <div class="col-md-1 mb-4">
-                        <input type="text" class="act_code form-control" style="width:100%;">
+            <div class="content-mobile">
+                {# data headings and inputs #}
+                <div class="activity">
+                    <div class="row">
+                        <div class="col-md-1 mb-4">
+                            <span class="txt-gold">
+                                <h5>Code</h5>
+                            </span>
+                            <input type="text" class="act_code form-control" style="width:100%;">
+                        </div>
+                        <div class="col-md-3 mb-4">
+                            <span class="txt-gold">
+                                <h5>Name</h5>
+                            </span>
+                            <input type="text" class="act_name form-control" style="width:100%;">
+                        </div>
+                        <div class="col-md-2 mb-4">
+                            <span class="txt-gold">
+                                <h5>Category</h5>
+                            </span>
+                            <select class="act_category form-control" style="width:100%;">
+                                <option value="" disabled selected>Select...</option>
+                                <option value="Class">Class</option>
+                                <option value="Rotation">Rotation</option>
+                                <option value="Custom">Custom</option>
+                            </select>
+                        </div>
+                        <div class="col-md-2 mb-4">
+                            <span class="txt-gold">
+                                <h5>Start weeks</h5>
+                            </span>
+                            <select class="act_slot_selector form-control" multiple>
+                                {% for week in all_weeks %}
+                                    <option value="{{ week }}">{{ week }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="col-md-2 mb-4">
+                            <textarea class="form-control selected_slots" disabled></textarea>
+                        </div>
+                        <div class="col-md-2 mb-4">
+                            <span class="txt-gold">
+                                   <h5>Length</h5>
+                               </span>
+                            <select class="act_length form-control">
+                                <option value="" disabled selected>Select...</option>
+                                <option value="1">1</option>
+                                <option value="2">2</option>
+                                <option value="3">3</option>
+                                <option value="4">4</option>
+                            </select>
+                            <a href="#" class="close remove_activity hidden">&times;</a>
+                        </div>            
                     </div>
-                    <div class="col-md-3 mb-4">
-                        <input type="text" class="act_name form-control" style="width:100%;">
-                    </div>
-                    <div class="col-md-2 mb-4">
-                        <select class="act_category form-control" style="width:100%;">
-                            <option value="" disabled selected>Select...</option>
-                            <option value="Class">Class</option>
-                            <option value="Rotation">Rotation</option>
-                            <option value="Custom">Custom</option>
-                        </select>
-                    </div>
-                    <div class="col-md-2 mb-4">
-                        <select class="act_slot_selector form-control" multiple>
-                            {% for week in all_weeks %}
-                                <option value="{{ week }}">{{ week }}</option>
-                            {% endfor %}
-                        </select>
-                    </div>
-                    <div class="col-md-2 mb-4">
-                        <textarea class="form-control selected_slots" disabled></textarea>
-                    </div>
-                    <div class="col-md-2 mb-4">
-                        <select class="act_length form-control">
-                            <option value="" disabled selected>Select...</option>
-                            <option value="1">1</option>
-                            <option value="2">2</option>
-                            <option value="3">3</option>
-                            <option value="4">4</option>
-                        </select>
-                        <a href="#" class="close remove_activity hidden">&times;</a>
-                    </div>            
                 </div>
             </div>
 
@@ -349,7 +572,7 @@
         {# generate schedules #}
         <div class="row">
             <div class="col-md-5"></div>
-            <div class="col-md-2">
+            <div class="col-md-2 center">
                 {% csrf_token %}
                 <a role="button" class="btn btn-primary txt-w" id="generate">Generate Schedules</a>
             </div>
