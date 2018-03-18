@@ -33,8 +33,12 @@ def generate_programs(request):
         return JsonResponse({"success": False, "error" : "Empty request."})
 
     # return programs
-    data = helpers.get_schedules(params)
-    return JsonResponse(data)
+    try:
+        data = helpers.get_schedules(params)
+    except Exception as ex:
+        data = {"success" : False, "error" : """Exception: %s.""" % ex.__class__.__name__ }
+    finally:
+        return JsonResponse(data)
 
 
 def about(request):

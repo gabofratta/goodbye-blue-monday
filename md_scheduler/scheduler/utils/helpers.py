@@ -5,7 +5,7 @@ import copy
 
 
 def get_schedules(data):
-    timeout = 10 # in seconds
+    timeout = 15 # in seconds
     activity_list = []
     itinerary_list = []
 
@@ -37,13 +37,10 @@ def get_schedules(data):
         activity = activity_list.pop()
         itinerary_count = len(itinerary_list)
 
-        # Check timeout
-        if (datetime.now() - t1).seconds > timeout:
-            return {"success" : False, "error" : "Operation timed out."}
-
         # For each itinerary
         for i in range(itinerary_count):
             itinerary = itinerary_list.pop(0)
+
             # For each activity time slot
             for slot in activity.slots:
                 # If no conflict, add activity w/ time slot to itinerary
@@ -52,6 +49,11 @@ def get_schedules(data):
                     instance = classes.Activity_Instance(activity, slot)
                     itinerary_copy.add_activity(instance)
                     itinerary_list.append(itinerary_copy)
+
+            # Check timeout
+            if (datetime.now() - t1).seconds > timeout:
+                return {"success" : False, "error" : "Operation timed out."}
+
 
     # Prepare return array
     ret_val = {"success" : True, "size" : len(itinerary_list)}

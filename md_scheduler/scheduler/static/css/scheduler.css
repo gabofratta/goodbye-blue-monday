@@ -3,7 +3,7 @@ body {
   padding-top: 60px;
 }
 
-@media only screen and (max-width: 810px) {
+@media only screen and (max-width: 767.9px) {
   body {
     padding-top: 50px;
   }
@@ -13,7 +13,7 @@ body {
     display: none !important;
 }
 
-@media only screen and (max-width: 810px) {
+@media only screen and (max-width: 767.9px) {
     .content-desktop {
         display: none !important;
     }
@@ -21,6 +21,11 @@ body {
     .content-mobile {
         display: inline !important;
     }
+}
+
+.flex-link {
+    display: flex !important;
+    align-items: center;
 }
 
 .spacer20 { 

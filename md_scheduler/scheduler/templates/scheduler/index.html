@@ -1,8 +1,8 @@
 {% load staticfiles %}
 <html>
 <head>
-    
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="shortcut icon" href="{%  static 'favicon.ico' %}"/>
     <link rel="stylesheet" href="{% static 'css/scheduler.css' %}">
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css">
     <script src="https://code.jquery.com/jquery-3.3.1.min.js" integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8=" crossorigin="anonymous"></script>
@@ -16,7 +16,10 @@
     {# top menu #}
     <nav class="navbar fixed-top navbar-expand-md navbar-dark bg-teal">
             <div class="container">
-                <a class="navbar-brand" href="#">MS4 Planner</a>
+                <a class="navbar-brand flex-link" href="#">
+                    <img src="{%  static 'favicon_nav.ico' %}" height="24px" />
+                    &nbsp;MS4 Planner
+                </a>
                 <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarCollapse" aria-controls="navbarCollapse" aria-expanded="false" aria-label="Toggle navigation">
                     <span class="navbar-toggler-icon"></span>
                 </button>
@@ -438,124 +441,80 @@
 
         {# data entry section #}
         <div class="container">
-            <div class="content-desktop">
-                {# section headings #}
-                <div class="row activity_header">
-                    <div class="col-md-1 mb-2">
-                        <h5>Code</h5>
-                    </div>
-                    <div class="col-md-3 mb-2">
-                        <h5>Name</h5>
-                    </div>
-                    <div class="col-md-2 mb-2">
-                        <h5>Category</h5>
-                    </div>
-                    <div class="col-md-2 mb-2">
-                        <h5>Start weeks</h5>
-                    </div>
-                    <div class="col-md-2 mb-2">
-                        <h5></h5>
-                    </div>
-                    <div class="col-md-2 mb-2">
-                        <h5>Length</h5>
-                    </div>
+            {# section headings #}
+            <div class="row activity_header content-desktop">
+                <div class="col-md-1 mb-2">
+                    <h5>Code</h5>
                 </div>
-
-                {# data inputs #}
-                <div class="activity">
-                    <div class="row">
-                        <div class="col-md-1 mb-4">
-                            <input type="text" class="act_code form-control" style="width:100%;">
-                        </div>
-                        <div class="col-md-3 mb-4">
-                            <input type="text" class="act_name form-control" style="width:100%;">
-                        </div>
-                        <div class="col-md-2 mb-4">
-                            <select class="act_category form-control" style="width:100%;">
-                                <option value="" disabled selected>Select...</option>
-                                <option value="Class">Class</option>
-                                <option value="Rotation">Rotation</option>
-                                <option value="Custom">Custom</option>
-                            </select>
-                        </div>
-                        <div class="col-md-2 mb-4">
-                            <select class="act_slot_selector form-control" multiple>
-                                {% for week in all_weeks %}
-                                    <option value="{{ week }}">{{ week }}</option>
-                                {% endfor %}
-                            </select>
-                        </div>
-                        <div class="col-md-2 mb-4">
-                            <textarea class="form-control selected_slots" disabled></textarea>
-                        </div>
-                        <div class="col-md-2 mb-4">
-                            <select class="act_length form-control">
-                                <option value="" disabled selected>Select...</option>
-                                <option value="1">1</option>
-                                <option value="2">2</option>
-                                <option value="3">3</option>
-                                <option value="4">4</option>
-                            </select>
-                            <a href="#" class="close remove_activity hidden">&times;</a>
-                        </div>            
-                    </div>
+                <div class="col-md-3 mb-2">
+                    <h5>Name</h5>
+                </div>
+                <div class="col-md-2 mb-2">
+                    <h5>Category</h5>
+                </div>
+                <div class="col-md-2 mb-2">
+                    <h5>Start weeks</h5>
+                </div>
+                <div class="col-md-2 mb-2">
+                    <h5></h5>
+                </div>
+                <div class="col-md-2 mb-2">
+                    <h5>Length</h5>
                 </div>
             </div>
 
-            <div class="content-mobile">
-                {# data headings and inputs #}
-                <div class="activity">
-                    <div class="row">
-                        <div class="col-md-1 mb-4">
-                            <span class="txt-gold">
-                                <h5>Code</h5>
-                            </span>
-                            <input type="text" class="act_code form-control" style="width:100%;">
-                        </div>
-                        <div class="col-md-3 mb-4">
-                            <span class="txt-gold">
-                                <h5>Name</h5>
-                            </span>
-                            <input type="text" class="act_name form-control" style="width:100%;">
-                        </div>
-                        <div class="col-md-2 mb-4">
-                            <span class="txt-gold">
-                                <h5>Category</h5>
-                            </span>
-                            <select class="act_category form-control" style="width:100%;">
-                                <option value="" disabled selected>Select...</option>
-                                <option value="Class">Class</option>
-                                <option value="Rotation">Rotation</option>
-                                <option value="Custom">Custom</option>
-                            </select>
-                        </div>
-                        <div class="col-md-2 mb-4">
-                            <span class="txt-gold">
-                                <h5>Start weeks</h5>
-                            </span>
-                            <select class="act_slot_selector form-control" multiple>
-                                {% for week in all_weeks %}
-                                    <option value="{{ week }}">{{ week }}</option>
-                                {% endfor %}
-                            </select>
-                        </div>
-                        <div class="col-md-2 mb-4">
-                            <textarea class="form-control selected_slots" disabled></textarea>
-                        </div>
-                        <div class="col-md-2 mb-4">
-                            <span class="txt-gold">
-                                   <h5>Length</h5>
-                               </span>
-                            <select class="act_length form-control">
-                                <option value="" disabled selected>Select...</option>
-                                <option value="1">1</option>
-                                <option value="2">2</option>
-                                <option value="3">3</option>
-                                <option value="4">4</option>
-                            </select>
-                            <a href="#" class="close remove_activity hidden">&times;</a>
-                        </div>            
+            {# data inputs #}
+            <div class="activity">
+                <div class="row">
+                    <div class="col-md-1 mb-4">
+                        <span class="txt-gold content-mobile">
+                            <h5>Code</h5>
+                        </span>
+                        <input type="text" class="act_code form-control" style="width:100%;">
                     </div>
+                    <div class="col-md-3 mb-4">
+                        <span class="txt-gold content-mobile">
+                            <h5>Name</h5>
+                        </span>
+                        <input type="text" class="act_name form-control" style="width:100%;">
+                    </div>
+                    <div class="col-md-2 mb-4">
+                        <span class="txt-gold content-mobile">
+                            <h5>Category</h5>
+                        </span>
+                        <select class="act_category form-control" style="width:100%;">
+                            <option value="" disabled selected>Select...</option>
+                            <option value="Class">Class</option>
+                            <option value="Rotation">Rotation</option>
+                            <option value="Custom">Custom</option>
+                        </select>
+                    </div>
+                    <div class="col-md-2 mb-4">
+                        <span class="txt-gold content-mobile">
+                            <h5>Start weeks</h5>
+                        </span>
+                        <select class="act_slot_selector form-control" multiple>
+                            {% for week in all_weeks %}
+                                <option value="{{ week }}">{{ week }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="col-md-2 mb-4">
+                        <textarea class="form-control selected_slots" disabled></textarea>
+                    </div>
+                    <div class="col-md-2 mb-4">
+                        <span class="txt-gold content-mobile">
+                            <h5>Length</h5>
+                        </span>
+                        <select class="act_length form-control">
+                            <option value="" disabled selected>Select...</option>
+                            <option value="1">1</option>
+                            <option value="2">2</option>
+                            <option value="3">3</option>
+                            <option value="4">4</option>
+                        </select>
+                        <a href="#" class="close remove_activity hidden">&times;</a>
+                    </div>            
                 </div>
             </div>
 
