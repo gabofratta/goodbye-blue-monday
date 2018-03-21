@@ -1,35 +1,40 @@
 
-// Clear selections from given jquery object for multi_select div
-function clearSelections(multi_select) {
+// Reset given jquery object for multi_select div
+function resetSelector(multi_select) {
+    // Uncheck everything
     multi_select.find('.multi_options input[type="checkbox"]').each(function (index) {
         $(this).prop('checked', false);
     });
 
+    // Hide options
     multi_select.find('.multi_options').hide();
+
+    // Reset option text
+    multi_select.find('option').text('Select...');
 }
 
-// Get all options for the given jquery object for multi_select div
-function getAllOptions(multi_select) {
-    var options = [];
-
+// Set checked checkboxes for given jquery object (multi_select div) and list of selections
+function setSelections(multi_select, selections) {
     multi_select.find('.multi_options input[type="checkbox"]').each(function (index) {
-        options.push($(this).val());
+        var index = jQuery.inArray($(this).val(), selections); // -1 if not in list
+        var checked = (index !== -1); // true if in list, else false
+        $(this).prop('checked', checked);
     });
 
-    return options;
+    // update selector text
+    updateSelectorText(multi_select, selections);
 }
 
-// Get selected options for the given jquery object for multi_select div
-function getSelected(multi_select) {
-    var checked = [];
+// Update selector text for given jquery object (multi_select div) and list of selections
+function updateSelectorText(multi_select, selections) {
+    var option = multi_select.find('option');
 
-    multi_select.find('.multi_options input[type="checkbox"]').each(function (index) {
-        if ($(this).is(':checked')) {
-            checked.push($(this).val());
-        }
-    });
-
-    return checked;
+    // Set selector text
+    if (selections.length == 0) {
+        option.text('Select...');
+    } else {
+        option.text(selections.length + ' selected');
+    }
 }
 
 
@@ -49,12 +54,14 @@ $(document).ready(function() {
             var options_size = all_multi_options.css("max-height");
             options_size = options_size.substring(0, options_size.length - 2);
 
+            // Open options div on top if it doesn't fit below
             if (options_size > space_below) {
                 multi_options.css("top", "-" + options_size + "px");
             } else {
                 multi_options.css("top", "");
             }
 
+            // Scroll to top of options div
             setTimeout(function() {multi_options.scrollTop(0);}, 0);
             multi_options.show();
         } else {
@@ -71,19 +78,27 @@ $(document).ready(function() {
         }
     });
 
-    // Set text area value to checked boxes
+    // Handle checkbox toggle
     $('.multi_options input[type="checkbox"]').on('click', function() {
-        var text = "";
-        var options =  $(this).parent().parent();
+        var checked = [];
+        var options = $(this).parent().parent();
+        var multi_select = options.parent();
 
+        // Gather selected options
         options.find('input[type="checkbox"]').each(function (index) {
             if ($(this).is(':checked')) {
-                text += $(this).val() + '\n';
+                checked.push($(this).val());
             }
         });
 
-        text = text.substring(0, text.length - 1);
-        options.parent().parent().next().find('.selected_slots').val(text);
+        // Set text area value
+        multi_select.parent().next().find('.selected_slots').val(checked.join('\n'));
+
+        // update selector text
+        updateSelectorText(multi_select, checked);
+
+        // Update mobile select
+        multi_select.next('.act_slot_selector').val(checked);
     });
 
 });

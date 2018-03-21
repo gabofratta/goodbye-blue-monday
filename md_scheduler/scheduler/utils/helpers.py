@@ -21,7 +21,7 @@ def get_schedules(data):
 
     # Create seed itineraries
     if len(activity_list) > 0:
-        activity = activity_list.pop()
+        activity = activity_list.pop(0)
         # Make itinerary for each activity slot
         for slot in activity.slots:
             itinerary = classes.Itinerary()
@@ -34,7 +34,7 @@ def get_schedules(data):
 
     # Iterate over remaining activities
     while len(activity_list) > 0:
-        activity = activity_list.pop()
+        activity = activity_list.pop(0)
         itinerary_count = len(itinerary_list)
 
         # For each itinerary

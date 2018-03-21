@@ -125,7 +125,7 @@ $(document).ready(function() {
 
         var text = "";
         var activities = itineraries[itinerary_index];
-        var slot_opts = getAllOptions($('.multi_select').last());
+        var slot_opts = $('.act_slot_selector').last().children();
 
         // Build program text
         for (var j = 0; j < activities.length; j++) {
@@ -145,6 +145,17 @@ $(document).ready(function() {
         return false;
     });
 
+    $('.act_slot_selector').change(function() {
+        var value = $(this).val();
+        var parent = $(this).parent();
+
+        // display selected slots for each activity
+        parent.next().find('.selected_slots').val(value.join("\n"));
+
+        // Update custom selector
+        setSelections(parent.find('.multi_select'), value);
+    }); 
+
     $('#add_activity').click(function () {
         // close multi select
         $('.multi_options').hide();
@@ -156,7 +167,8 @@ $(document).ready(function() {
         // reset values
         new_activity.find("input[type='text']").val("");
         new_activity.find(".selected_slots").val("");
-        clearSelections(new_activity.find('.multi_select'));
+        resetSelector(new_activity.find('.multi_select'));
+        new_activity.find("select.act_slot_selector").val([]);
 
         // add another line to the form
         new_activity.hide();
@@ -216,7 +228,7 @@ $(document).ready(function() {
             activities["code_" + index] = $(this).find('.act_code').val();
             activities["name_" + index] = $(this).find('.act_name').val();
             activities["category_" + index] = $(this).find('.act_category').val();
-            activities["slots_" + index] = getSelected($(this).find('.multi_select'));
+            activities["slots_" + index] = $(this).find('.act_slot_selector').val();
             activities["length_" + index] = $(this).find('.act_length').val();
 
             // process time slots

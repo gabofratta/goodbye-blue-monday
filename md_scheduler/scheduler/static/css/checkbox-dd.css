@@ -34,11 +34,3 @@
     top: -1px;
     margin-right: 0.2em;
 }
-
-@media only screen and (max-width: 767.9px) {
-    .multi_options label {
-        padding-top: 0.3em;
-        padding-bottom: 0.3em;
-        border: 1px black dotted;
-    }
-}

@@ -502,7 +502,7 @@
                         <span class="txt-gold content-mobile">
                             <h5>Start weeks</h5>
                         </span>
-                        <div class="multi_select"> 
+                        <div class="multi_select content-desktop"> 
                             <div class="select_box">
                                 <select class="form-control">
                                     <option value="" class="hidden" disabled selected>Select...</option>
@@ -516,6 +516,11 @@
                                 {% endfor %}
                             </div>
                         </div>
+                        <select class="act_slot_selector form-control content-mobile" multiple>
+                            {% for week in all_weeks %}
+                                <option value="{{ week }}">{{ week }}</option>
+                            {% endfor %}
+                        </select>
                     </div>
                     <div class="col-md-2 mb-4">
                         <textarea class="form-control selected_slots" disabled></textarea>

@@ -144,6 +144,10 @@ textarea.form-control {
     color: #BF9B19
 }
 
+.act_slot_selector {
+    height: 2.4em;
+}
+
 .add_link {
     padding-left: 1em;
     padding-top: 1em;
