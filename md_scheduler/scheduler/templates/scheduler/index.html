@@ -1,13 +1,22 @@
+<!DOCTYPE html>
+
 {% load staticfiles %}
+
 <html>
 <head>
+
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
     <link rel="shortcut icon" href="{%  static 'favicon.ico' %}"/>
-    <link rel="stylesheet" href="{% static 'css/scheduler.css' %}">
+
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css">
+    <link rel="stylesheet" href="{% static 'css/checkbox-dd.css' %}">
+    <link rel="stylesheet" href="{% static 'css/scheduler.css' %}">
+
     <script src="https://code.jquery.com/jquery-3.3.1.min.js" integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8=" crossorigin="anonymous"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/hammer.js/2.0.8/hammer.min.js"></script>
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/hammer.js/2.0.8/hammer.min.js"></script>
+    <script src="{% static 'js/checkbox-dd.js' %}"></script>
     <script src="{% static 'js/scheduler.js' %}"></script>
 
 </head>
@@ -493,7 +502,21 @@
                         <span class="txt-gold content-mobile">
                             <h5>Start weeks</h5>
                         </span>
-                        <select class="act_slot_selector form-control" multiple>
+                        <div class="multi_select content-desktop"> 
+                            <div class="select_box">
+                                <select class="form-control">
+                                    <option value="" class="hidden" disabled selected>Select...</option>
+                                </select>
+                            </div>
+                            <div class="multi_options">
+                                {% for week in all_weeks %}
+                                    <label>
+                                        <input type="checkbox" value="{{ week }}" />{{ week }}
+                                    </label>
+                                {% endfor %}
+                            </div>
+                        </div>
+                        <select class="act_slot_selector form-control content-mobile" multiple>
                             {% for week in all_weeks %}
                                 <option value="{{ week }}">{{ week }}</option>
                             {% endfor %}
@@ -512,6 +535,10 @@
                             <option value="2">2</option>
                             <option value="3">3</option>
                             <option value="4">4</option>
+                            <option value="5">5</option>
+                            <option value="6">6</option>
+                            <option value="7">7</option>
+                            <option value="8">8</option>
                         </select>
                         <a href="#" class="close remove_activity hidden">&times;</a>
                     </div>            

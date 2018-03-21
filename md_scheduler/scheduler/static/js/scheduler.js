@@ -6,13 +6,16 @@ $(document).ready(function() {
 
     // hammer element on schedule table for mobile swipe events
     var hammer = new Hammer(document.getElementById('schedule'), {});
+
     var generating = false;
     var weeks_per_row = 12;
     var weeks_per_month = 4;
+
     var itinerary_index = null;
     var itinerary_count = 0;
     var itineraries = [];
-    var activity_name_length = 15
+
+    var activity_name_length = 25;
     var default_colors = [["RED", "WHITE"], ["BLUE", "WHITE"], ["PURPLE", "WHITE"], ["GREEN", "WHITE"], ["GRAY", "WHITE"], ["#aa6e28", "WHITE"],
                           ["NAVY", "WHITE"], ["MAROON", "WHITE"], ["OLIVE", "WHITE"], ["TEAL", "WHITE"], ["BLACK", "WHITE"], ["YELLOW", "BLACK"], 
                           ["LIME", "BLACK"], ["AQUA", "BLACK"], ["FUCHSIA", "BLACK"], ["ORANGE", "BLACK"], ["PINK", "BLACK"], ["SILVER", "BLACK"]];
@@ -23,6 +26,9 @@ $(document).ready(function() {
 
     // dismissable option
     $('.close').click(function () {
+        // close multi select
+        $('.multi_options').hide();
+
         // dismiss alert
         $(this).closest('.alert').fadeOut();
         return false;
@@ -30,6 +36,9 @@ $(document).ready(function() {
 
 
     hammer.on('swiperight', function() {
+        // close multi select
+        $('.multi_options').hide();
+
         // Show error if no schedules
         if (itinerary_count == 0) {
             return false;
@@ -48,6 +57,9 @@ $(document).ready(function() {
     });
 
    hammer.on('swipeleft', function() {
+        // close multi select
+        $('.multi_options').hide();
+
         // Show error if no schedules
         if (itinerary_count == 0) {
             return false;
@@ -62,6 +74,9 @@ $(document).ready(function() {
     });
 
     $('.prev_program').click(function () {
+        // close multi select
+        $('.multi_options').hide();
+
         // Show error if no schedules
         if (itinerary_count == 0) {
             setAlert('.alert-danger', "You must generate some schedules first.");
@@ -81,6 +96,9 @@ $(document).ready(function() {
     });
 
     $('.next_program').click(function () {
+        // close multi select
+        $('.multi_options').hide();
+
         // Show error if no schedules
         if (itinerary_count == 0) {
             setAlert('.alert-danger', "You must generate some schedules first.");
@@ -96,6 +114,9 @@ $(document).ready(function() {
     });
 
     $('.copy_program').click(function () {
+        // close multi select
+        $('.multi_options').hide();
+
         // Show error if no schedules
         if (itinerary_count == 0) {
             setAlert('.alert-danger', "You must generate some schedules first.");
@@ -110,7 +131,7 @@ $(document).ready(function() {
         for (var j = 0; j < activities.length; j++) {
             var line = activities[j].code + " - " + activities[j].name + " - " + activities[j].category + ": ";
             for (var k = 0; k < activities[j].slots.length; k++) {
-                var week = slot_opts.eq(activities[j].slots[k] - 1).text();
+                var week = slot_opts[activities[j].slots[k] - 1];
                 line += (week + ", ");
             }
             text += (line.substring(0, line.length - 2) + "\n");
@@ -125,11 +146,20 @@ $(document).ready(function() {
     });
 
     $('.act_slot_selector').change(function() {
+        var value = $(this).val();
+        var parent = $(this).parent();
+
         // display selected slots for each activity
-        $(this).parent().next().find('.selected_slots').val($(this).val().join("\n"));
+        parent.next().find('.selected_slots').val(value.join("\n"));
+
+        // Update custom selector
+        setSelections(parent.find('.multi_select'), value);
     }); 
 
     $('#add_activity').click(function () {
+        // close multi select
+        $('.multi_options').hide();
+
         // clone an activity line
         var last_activity = $('.activity').last();
         var new_activity = last_activity.clone(true);
@@ -137,6 +167,7 @@ $(document).ready(function() {
         // reset values
         new_activity.find("input[type='text']").val("");
         new_activity.find(".selected_slots").val("");
+        resetSelector(new_activity.find('.multi_select'));
         new_activity.find("select.act_slot_selector").val([]);
 
         // add another line to the form
@@ -149,6 +180,9 @@ $(document).ready(function() {
     });    
 
     $('.remove_activity').click(function () {
+        // close multi select
+        $('.multi_options').hide();
+
         // remove current activity line
         $(this).closest('.activity').fadeOut(400, function () {
             $(this).prev('.act_spacer').remove();
@@ -170,6 +204,9 @@ $(document).ready(function() {
             return false;
         }
         generating = true;
+
+        // close multi select
+        $('.multi_options').hide();
 
         // dismissable option
         $('.alert-success').fadeOut();
@@ -293,12 +330,13 @@ $(document).ready(function() {
 
     function showItinerary(index) {
         var schedule_table = $('#schedule');
+        var cells = schedule_table.find('[class*=cell_]');
 
         // Clear calendar
-        schedule_table.find('[class*=cell_]').text('');
-        schedule_table.find('[class*=cell_]').removeClass('hidden');
-        schedule_table.find('[class*=cell_]').css({"background-color" : "", "color" : ""});
-        schedule_table.find('[class*=cell_]').height('auto');
+        cells.text('');
+        cells.removeClass('hidden');
+        cells.css({"background-color" : "", "color" : ""});
+        cells.height('auto');
 
         // Get itinerary
         var activities = itineraries[index];
@@ -337,7 +375,7 @@ $(document).ready(function() {
         $('.program_index').text((index + 1) + ' of ' + itinerary_count);
 
         // Set activity div heights
-        schedule_table.find('.activity_display').height(max_h + "px");
+        cells.height(max_h + "px");
     }
 
     function truncate(phrase, size) {
