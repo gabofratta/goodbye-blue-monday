@@ -437,16 +437,27 @@
                     <a href="#" class="next_program float-r">Next &rarr;</a>
                 </div>
             </div>
-            <div class="row">
-                <div class="col-md-2" style="display:flex;justify-content: center;">
-                <a role="button" class="btn btn-secondary copy_program txt-w" style="margin-top: 1em;">Copy Schedule</a>
-            </div>
+                <div class="row">
+                    <div class="col-md-2 flex-center">
+                    <a role="button" class="btn btn-secondary copy_program txt-w mt-3">Copy Schedule</a>
+                </div>
             </div>
         </div>
 
         <div class="spacer20"></div>
         <hr>
         <div class="spacer20"></div>
+
+        {# import/export activities #}
+        <div class="container">
+            <div class="row import-export">
+                <div class="col-md-12 mb-4">
+                    <a role="button" class="btn btn-secondary export_acts txt-w">Export</a>
+                    <a role="button" class="btn btn-secondary import_acts txt-w ml-5">Import</a>
+                    <input type="file" class="hidden" id="file_input" />
+                </div>
+            </div>
+        </div>
 
         {# data entry section #}
         <div class="container">
@@ -479,19 +490,19 @@
                         <span class="txt-gold content-mobile">
                             <h5>Code</h5>
                         </span>
-                        <input type="text" class="act_code form-control" style="width:100%;">
+                        <input type="text" class="act_code form-control w-100-pc">
                     </div>
                     <div class="col-md-3 mb-4">
                         <span class="txt-gold content-mobile">
                             <h5>Name</h5>
                         </span>
-                        <input type="text" class="act_name form-control" style="width:100%;">
+                        <input type="text" class="act_name form-control w-100-pc">
                     </div>
                     <div class="col-md-2 mb-4">
                         <span class="txt-gold content-mobile">
                             <h5>Category</h5>
                         </span>
-                        <select class="act_category form-control" style="width:100%;">
+                        <select class="act_category form-control w-100-pc">
                             <option value="" disabled selected>Select...</option>
                             <option value="Class">Class</option>
                             <option value="Rotation">Rotation</option>
@@ -557,8 +568,7 @@
 
         {# generate schedules #}
         <div class="row">
-            <div class="col-md-5"></div>
-            <div class="col-md-2 center">
+            <div class="col-md-12 center">
                 {% csrf_token %}
                 <a role="button" class="btn btn-primary txt-w" id="generate">Generate Schedules</a>
             </div>
@@ -588,7 +598,7 @@
                     <h6 class="text-uppercase font-weight-bold">
                         <strong>Disclaimer</strong>
                     </h6>
-                    <hr class="teal accent-3 mb-3 mt-0 d-inline-block mx-auto" style="width: 60px;">
+                    <hr class="teal accent-3 mb-3 mt-0 d-inline-block mx-auto w-3_7-em">
                     <p>This application is in beta! No guarantees are made about the correctness of
                     its outputs. Furthermore, it is not associated with or sanctioned by any 
                     particular medical school(s). </p>
@@ -600,7 +610,7 @@
                     <h6 class="text-uppercase font-weight-bold">
                         <strong>Team</strong>
                     </h6>
-                    <hr class="teal accent-3 mb-3 mt-0 d-inline-block mx-auto" style="width: 60px;">
+                    <hr class="teal accent-3 mb-3 mt-0 d-inline-block mx-auto w-3_7-em">
                     <p>Gabz</p>
                     <p>Jor</p>
                     <p>Stefi</p>
@@ -612,7 +622,7 @@
                     <h6 class="text-uppercase font-weight-bold">
                         <strong>Contact</strong>
                     </h6>
-                    <hr class="teal accent-3 mb-3 mt-0 d-inline-block mx-auto" style="width: 60px;">
+                    <hr class="teal accent-3 mb-3 mt-0 d-inline-block mx-auto w-3_7-em">
                     <p>To report bugs or suggest features:</p>
                     <p>info@example.com</p>
                 </div>

@@ -28,6 +28,10 @@ body {
     .content-mobile {
         display: inline !important;
     }
+
+    .import-export {
+        text-align: center;
+    }
 }
 
 .flex-link {
@@ -125,6 +129,19 @@ textarea.form-control {
 
 .float-l {
     float: left;
+}
+
+.flex-center {
+    display: flex;
+    justify-content: center;
+}
+
+.w-100-pc {
+    width: 100%;
+}
+
+.w-3_7-em {
+    width: 3.7em;
 }
 
 .activity {
