@@ -131,7 +131,7 @@ $(document).ready(function() {
         for (var j = 0; j < activities.length; j++) {
             var line = activities[j].code + " - " + activities[j].name + " - " + activities[j].category + ": ";
             for (var k = 0; k < activities[j].slots.length; k++) {
-                var week = slot_opts[activities[j].slots[k] - 1];
+                var week = slot_opts.eq(activities[j].slots[k] - 1).text();
                 line += (week + ", ");
             }
             text += (line.substring(0, line.length - 2) + "\n");
@@ -143,6 +143,113 @@ $(document).ready(function() {
         // Show success alert
         setAlert('.alert-success', "Schedule copied to clipboard.");
         return false;
+    });
+
+    $('.export_acts').click(function () {
+        var activities = {};
+        var valid = true;
+
+        // close multi select
+        $('.multi_options').hide();
+
+        // iterate over all activities
+        $('.activity').each(function(index) {
+            // store values
+            activities["size"] = index + 1;
+            activities["code_" + index] = $(this).find('.act_code').val();
+            activities["name_" + index] = $(this).find('.act_name').val();
+            activities["category_" + index] = $(this).find('.act_category').val();
+            activities["slots_" + index] = $(this).find('.act_slot_selector').val();
+            activities["length_" + index] = $(this).find('.act_length').val();
+
+            // validate values
+            if (activities["code_" + index].trim() == "" || activities["name_" + index].trim() == "" ||
+                activities["category_" + index] == null || activities["slots_" + index].length == 0 ||
+                activities["length_" + index] == null) {
+                // if blank, break and report error
+                setAlert('.alert-danger', "Activity number " + (index + 1) + " is incomplete.");
+                valid = false;
+                return false;
+            }
+        });
+
+        // download text file, if data is valid
+        if (valid) {
+            download("ms4planner_activities.txt", JSON.stringify(activities))
+        }
+        return false;
+    });
+
+    $('.import_acts').click(function () {
+        // close multi select
+        $('.multi_options').hide();
+
+        // call hidden file uploader
+        $('#file_input').click();
+
+        return false;
+    });
+
+    $('#file_input').change(function () {
+        // check if browser supports FileReader
+        if (!(window.File && window.FileReader && window.FileList && window.Blob)) {
+            setAlert('.alert-danger', "Your browser does not support this feature.");
+            $(this).val('');
+            return false;
+        }
+
+        // get file object
+        var file = $(this)[0].files[0];
+
+        // no file selected
+        if (file == undefined) {
+            $(this).val('');
+            return false;
+        }
+
+        // check that file is .txt.
+        if (file.type != 'text/plain') {
+            setAlert('.alert-danger', "Invalid file type. Expecting a text file.");
+            $(this).val('');
+            return false;
+        }
+
+        // check file size
+        if (file.size = 0 || file.size > 2000) {
+            setAlert('.alert-danger', "Invalid file size.");
+            $(this).val('');
+            return false;
+        }
+
+        // create FileReader object
+        var reader = new FileReader();
+        reader.onload = (function (reader) {
+            return function () {
+                // show loading overlay after 0.5 sec
+                var loadingTO = setTimeout(function() {
+                    $('.loading').removeClass('hidden');
+                }, 500);
+
+                try {
+                    // copy activities onto web page
+                    var contents = JSON.parse(reader.result);
+                    generateActivities(contents);
+                    setAlert('.alert-success', "Activities imported successfully.");
+                } catch (ex) {
+                    // alert error, reset activity pane
+                    setAlert('.alert-danger', "There was something wrong with the imported file.");
+                    resetActivities();
+                } finally {
+                    hideLoader(loadingTO);
+                }
+            }
+        })(reader);
+
+        // read file
+        reader.readAsText(file);
+
+        // clear form
+        $(this).val('');
     });
 
     $('.act_slot_selector').change(function() {
@@ -160,22 +267,9 @@ $(document).ready(function() {
         // close multi select
         $('.multi_options').hide();
 
-        // clone an activity line
-        var last_activity = $('.activity').last();
-        var new_activity = last_activity.clone(true);
+        // add a new acitivity
+        addActivity();
 
-        // reset values
-        new_activity.find("input[type='text']").val("");
-        new_activity.find(".selected_slots").val("");
-        resetSelector(new_activity.find('.multi_select'));
-        new_activity.find("select.act_slot_selector").val([]);
-
-        // add another line to the form
-        new_activity.hide();
-        new_activity.find('.remove_activity').removeClass('hidden');
-        new_activity.insertAfter(last_activity);
-        new_activity.before('<div class="act_spacer spacer20"></div>');
-        new_activity.fadeIn();
         return false;
     });    
 
@@ -241,7 +335,7 @@ $(document).ready(function() {
                 activities["category_" + index] == null || activities["slots_" + index].length == 0 || 
                 activities["length_" + index] == null) {
                 // if blank, break and report error
-                setAlert('.alert-danger', "Activity number " + (index + 1) + " is incomplete.")
+                setAlert('.alert-danger', "Activity number " + (index + 1) + " is incomplete.");
                 generating = false;
                 valid = false;
                 return false;
@@ -328,6 +422,25 @@ $(document).ready(function() {
         });
     }
 
+    function addActivity() {
+        // clone an activity line
+        var last_activity = $('.activity').last();
+        var new_activity = last_activity.clone(true);
+
+        // reset values
+        new_activity.find("input[type='text']").val("");
+        new_activity.find(".selected_slots").val("");
+        resetSelector(new_activity.find('.multi_select'));
+        new_activity.find("select.act_slot_selector").val([]);
+
+        // add another line to the form
+        new_activity.hide();
+        new_activity.find('.remove_activity').removeClass('hidden');
+        new_activity.insertAfter(last_activity);
+        new_activity.before('<div class="act_spacer spacer20"></div>');
+        new_activity.fadeIn();
+    }
+
     function showItinerary(index) {
         var schedule_table = $('#schedule');
         var cells = schedule_table.find('[class*=cell_]');
@@ -386,6 +499,64 @@ $(document).ready(function() {
 
         // return truncated phrase
         return phrase.substring(0, size - 3).trim() + '...';
+    }
+
+    function generateActivities(contents) {
+        var size = contents.size; // # of activities in array
+
+        // check json length
+        if (size == undefined || size < 1) {
+            throw "Invalid array size";
+        }
+
+        // add activity lines to match json length
+        for (var i = 0; i < (size - $('.activity').length); i++) {
+            addActivity();
+        }
+
+        // activity dom objects
+        var activities = $('.activity');
+
+        // iterate over activities in imported file
+        for (var i = 0; i < size; i++) {
+            var activity = activities.eq(i);
+            activity.find('.act_code').val(contents["code_" + i]);
+            activity.find('.act_name').val(contents["name_" + i]);
+            activity.find('.act_category').val(contents["category_" + i]);
+            activity.find('.act_slot_selector').val(contents["slots_" + i]);
+            setSelections(activity.find('.multi_select'), contents["slots_" + i]);
+            activity.find('.act_length').val(contents["length_" + i]);
+            activity.find('.selected_slots').val(contents["slots_" + i].join("\n"));
+        }
+
+        // activity line count
+        var activity_cnt = activities.length;
+
+        // remove any extra activities
+        for (var i = (activity_cnt - 1); i >= size; i--) {
+            var activity = activities.eq(i);
+            activity.prev('.act_spacer').remove();
+            activity.remove();
+        }
+    }
+
+    function resetActivities() {
+        var activities = $('.activity');
+        var activity = activities.first();
+
+        // clear all info on first activity
+        activity.find("input[type='text']").val('');
+        activity.find('select').val("");
+        activity.find('.act_slot_selector').val([]);
+        setSelections(activity.find('.multi_select'), []);
+        activity.find('.selected_slots').val('');
+
+        // remove all activities after first
+        for (var i = 1; i < activities.length; i++) {
+            var activity = activities.eq(i);
+            activity.prev('.act_spacer').remove();
+            activity.remove();
+        }
     }
 
 
@@ -449,6 +620,23 @@ $(document).ready(function() {
                 document.body.removeChild(textarea);
             }
         }
+    }
+
+
+    ////////// Export activities support ///////////
+
+
+    function download(filename, text) {
+        var element = document.createElement('a');
+        element.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(text));
+        element.setAttribute('download', filename);
+
+        element.style.display = 'none';
+        document.body.appendChild(element);
+
+        element.click();
+
+        document.body.removeChild(element);
     }
 
 });
