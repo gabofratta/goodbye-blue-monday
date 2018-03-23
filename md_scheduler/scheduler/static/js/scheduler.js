@@ -7,6 +7,7 @@ $(document).ready(function() {
     // hammer element on schedule table for mobile swipe events
     var hammer = new Hammer(document.getElementById('schedule'), {});
 
+    var importing = false;
     var generating = false;
     var weeks_per_row = 12;
     var weeks_per_month = 4;
@@ -181,6 +182,12 @@ $(document).ready(function() {
     });
 
     $('.import_acts').click(function () {
+        // prevent double hit
+        if (importing) {
+            return false;
+        }
+        importing = true;
+
         // close multi select
         $('.multi_options').hide();
 
@@ -195,6 +202,7 @@ $(document).ready(function() {
         if (!(window.File && window.FileReader && window.FileList && window.Blob)) {
             setAlert('.alert-danger', "Your browser does not support this feature.");
             $(this).val('');
+            importing = false;
             return false;
         }
 
@@ -204,6 +212,7 @@ $(document).ready(function() {
         // no file selected
         if (file == undefined) {
             $(this).val('');
+            importing = false;
             return false;
         }
 
@@ -211,6 +220,7 @@ $(document).ready(function() {
         if (file.type != 'text/plain') {
             setAlert('.alert-danger', "Invalid file type. Expecting a text file.");
             $(this).val('');
+            importing = false;
             return false;
         }
 
@@ -218,6 +228,7 @@ $(document).ready(function() {
         if (file.size = 0 || file.size > 2000) {
             setAlert('.alert-danger', "Invalid file size.");
             $(this).val('');
+            importing = false;
             return false;
         }
 
@@ -241,6 +252,7 @@ $(document).ready(function() {
                     resetActivities();
                 } finally {
                     hideLoader(loadingTO);
+                    importing = false;
                 }
             }
         })(reader);
@@ -388,7 +400,7 @@ $(document).ready(function() {
                     // Hide loader, show success alert
                     hideLoader(loadingTO);
                     setAlert('.alert-success', "Your schedule options are ready.");
-                    generating = false
+                    generating = false;
                 },
                 error: function(xhr, errmsg, err) {
                     hideLoader(loadingTO);
@@ -414,7 +426,14 @@ $(document).ready(function() {
     function setAlert(id, msg) {
         var alert = $(id);
 
-        // fade out if present
+        // fade out other alert
+        if (id == '.alert-danger') {
+            $('.alert-success').fadeOut();
+        } else {
+            $('.alert-danger').fadeOut();
+        }
+
+        // fade out this alert, if present
         alert.fadeOut(100, function() {
             // set alert text and fade in
             alert.find("strong").text(msg);
