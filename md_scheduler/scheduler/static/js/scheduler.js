@@ -32,6 +32,8 @@ function buildItineraries(data) {
     var activity_lengths = {};
     // map of activity name to start slots to itineraries in which they are used
     var activity_slot_itineraries = {};
+    // map of currently filtered out slots for each activity
+    var activity_fo_slots = {};
 
     // iterate over itineraries
     for (var i = 0; i < count; i++) {
@@ -47,6 +49,7 @@ function buildItineraries(data) {
                 activity_slots[activity.name] = [];
                 activity_lengths[activity.name] = activity.len;
                 activity_slot_itineraries[activity.name] = {};
+                activity_fo_slots[activity.name] = [];
             }
 
             // if new slot, initialize objects/arrays
@@ -56,6 +59,11 @@ function buildItineraries(data) {
             } else {
                 activity_slot_itineraries[activity.name][activity.slots[0]].push(i);
             }
+        }
+
+        // if last itinerary, sort slots for every activity
+        if (i == (count - 1)) {
+            activity_slots[activity.name].sort(function(a, b) { return a - b; });
         }
     }
 
@@ -97,6 +105,12 @@ function buildItineraries(data) {
             filtered_count = count;
             index = 0;
         },
+        set_filter: function(filter_list) {
+            activity_fo_slots = filter_list;
+        },
+        get_filtered_for: function(activity) {
+            return activity_fo_slots[activity];
+        },
         filter_out: function(remove_list) {
             // sort itinerary ids
             remove_list.sort(function(a, b) { return a - b; });
@@ -111,6 +125,9 @@ function buildItineraries(data) {
         is_filtered: function() {
             return (filtered_count !== count);
         },
+        get_activity_count: function() {
+            return activity_names.length;
+        },
         get_activity_length: function(activity_name) {
             return activity_lengths[activity_name];
         },
@@ -122,12 +139,41 @@ function buildItineraries(data) {
         },
         get_itineraries_for: function(activity_name, slot) {
             return activity_slot_itineraries[activity_name][slot];
+        },
+        // manage state for page history
+        get_state: function() {
+            return {
+                "count" : count,
+                "index" : index,
+                "itineraries" : itineraries,
+                "filtered_count" : filtered_count,
+                "filtered_itineraries" : filtered_itineraries,
+                "activity_names" : activity_names,
+                "activity_slots" : activity_slots,
+                "activity_lengths" : activity_lengths,
+                "activity_slot_itineraries" : activity_slot_itineraries,
+                "activity_fo_slots" : activity_fo_slots
+            };
+        },
+        set_state: function(data) {
+            count = data.count;
+            index = data.index;
+            itineraries = data.itineraries;
+            filtered_count = data.filtered_count;
+            filtered_itineraries = data.filtered_itineraries;
+            is_filter_ready = false;
+            activity_names = data.activity_names;
+            activity_slots = data.activity_slots;
+            activity_lengths = data.activity_lengths;
+            activity_slot_itineraries = data.activity_slot_itineraries;
+            activity_fo_slots = data.activity_fo_slots;
         }
     };
 }
 
 
 $(document).ready(function() {
+
 
     //////////////////////////////
     ////////// Globals ///////////
@@ -155,18 +201,63 @@ $(document).ready(function() {
                           ["LIME", "BLACK"], ["AQUA", "BLACK"], ["FUCHSIA", "BLACK"],
                           ["ORANGE", "BLACK"], ["PINK", "BLACK"], ["SILVER", "BLACK"]];
 
-    $('#filter_pane').children().hide(); // to allow fade in
-    
+    $('#filter_pane').children().hide(); // to allow initial fade in
+
 
     /////////////////////////////////////
     ////////// Event handlers ///////////
     /////////////////////////////////////
 
 
+    ///////// User navigation /////////
+
+    // set current state to page history
+    history.replaceState({"data" : itineraries.get_state()}, '', '');
+
+    // listen on user click back, fwd buttons
+    window.addEventListener("popstate", function(e) {
+        // get state
+        var state = e.state;
+
+        // dismiss alerts
+        $('.alert').fadeOut();
+
+        // if there is a previous state
+        if (state !== null) {
+            // set itineraries object
+            itineraries.set_state(state.data);
+
+            // show itinerary
+            showItinerary();
+
+            // update activities form
+            if (itineraries.get_activity_count() > 0) {
+                var contents = {"activities" : itineraries.get_activities()};
+
+                // get slots and convert format
+                for (var i = 0; i < contents.activities.length; i++) {
+                    contents.activities[i]["slots"] = itineraries.get_activity_slots(contents.activities[i]["name"]);
+                    contents.activities[i]["slots"] = contents.activities[i]["slots"].map(slot_converter.id_to_text);
+                }
+
+                generateActivities(contents);
+            } else {
+                resetActivities();
+            }
+        }
+        return false;
+    });
+
+    // save state before navigating away
+    window.addEventListener("beforeunload", function () {
+        history.pushState({"data" : itineraries.get_state()}, '', '');
+    });
+
+
     ////////// Alerts ////////////
 
 
-    // dismissable alert
+    // dismiss alert
     $('.close_alert').click(function () {
         // close custom select
         $('.multi_options').hide();
@@ -304,30 +395,32 @@ $(document).ready(function() {
         // close custom select
         $('.multi_options').hide();
 
-        var activities = {};
+        var export_val = {"activities" : []};
         var valid = true;
         var names = [];
 
         // iterate over all activities
         $('.activity').each(function(index) {
+            var activity = {};
+
             // store values
-            activities["size"] = index + 1;
-            activities["code_" + index] = $(this).find('.act_code').val().trim();
-            activities["name_" + index] = $(this).find('.act_name').val().trim();
-            activities["category_" + index] = $(this).find('.act_category').val();
-            activities["slots_" + index] = $(this).find('.act_slot_selector').val();
-            activities["length_" + index] = $(this).find('.act_length').val();
-            names.push(activities["name_" + index]);
+            activity["code"] = $(this).find('.act_code').val().trim();
+            activity["name"] = $(this).find('.act_name').val().trim();
+            activity["category"] = $(this).find('.act_category').val();
+            activity["slots"] = $(this).find('.act_slot_selector').val();
+            activity["len"] = $(this).find('.act_length').val();
+            names.push(activity["name"]);
 
             // validate values
-            if (activities["code_" + index] == "" || activities["name_" + index] == "" ||
-                activities["category_" + index] == null || activities["slots_" + index].length == 0 ||
-                activities["length_" + index] == null) {
+            if (activity["code"] == "" || activity["name"] == "" || activity["category"] == null ||
+                activity["slots"].length == 0 || activity["len"] == null) {
                 // if blank, break and report error
                 setAlert('.alert-danger', "Activity number " + (index + 1) + " is incomplete.");
                 valid = false;
                 return false;
             }
+
+            export_val.activities.push(activity);
         });
 
         // check unique names
@@ -338,7 +431,7 @@ $(document).ready(function() {
 
         // download text file, if data is valid
         if (valid) {
-            download("ms4planner_activities.txt", JSON.stringify(activities))
+            download("ms4planner_activities.txt", JSON.stringify(export_val))
         }
         return false;
     });
@@ -518,15 +611,16 @@ $(document).ready(function() {
                 var activity = activity_names[index];
                 var slots = itineraries.get_activity_slots(activity);
                 var length = itineraries.get_activity_length(activity);
+                var unselected = itineraries.get_filtered_for(activity);
 
                 // set activity name
                 $(this).find('.f_act_name').text(activity);
 
                 // set multi select options for activity
-                createCustomOptions($(this).find('.multi_select'), slots);
+                createCustomOptions($(this).find('.multi_select'), slots, unselected);
 
                 // set mobile options for activity
-                createOptionsMobileSelect($(this).find('.f_act_slot_selector'), slots);
+                createOptionsMobileSelect($(this).find('.f_act_slot_selector'), slots, unselected);
 
                 // empty tag container
                 var top_div = $(this).find('.top_div');
@@ -538,6 +632,11 @@ $(document).ready(function() {
                                 '<span>&nbsp;-&nbsp;' + slot_converter.id_to_text(slots[i] + length) + '</span>' + 
                                 '<a href="#" class="close remove_tag">&times;</a></div>');
                     top_div.append(tag);
+
+                    // if unselected, hide
+                    if (unselected.indexOf(slots[i]) !== -1) {
+                        tag.hide();
+                    }
                 }
 
                 // register click event on tag removing 'x'
@@ -660,17 +759,21 @@ $(document).ready(function() {
         }, 500);
 
         itineraries.reset_filter(); // reset filter
+
         var remove_list = [];
+        var filter_list = {};
         
         // for each activity
         $('.f_activity').each(function (index) {
             var unselected = $(this).find('.f_act_slot_selector option:not(:selected)');
             var activity = $(this).find('.f_act_name').text();
+            filter_list[activity] = [];
             
             // for each unselected slot
             unselected.each(function (i) {
                 var slot_id = slot_converter.text_to_id($(this).val());
                 var itinerary_ids = itineraries.get_itineraries_for(activity, slot_id);
+                filter_list[activity].push(slot_id);
                 
                 // for each pertinent itinerary
                 for (var i = 0; i < itinerary_ids.length; i++) {
@@ -682,8 +785,12 @@ $(document).ready(function() {
             });
         });
 
-        itineraries.filter_out(remove_list); // filter out
-        showItinerary() // update schedule table
+        itineraries.set_filter(filter_list); // store filters
+        itineraries.filter_out(remove_list); // filter itineraries
+        showItinerary(); // update schedule table
+
+        // add current state to page history
+        history.pushState({"data" : itineraries.get_state()}, '', '');
 
         // hide loader
         hideLoader(loadingTO);
@@ -808,10 +915,13 @@ $(document).ready(function() {
                         setAlert('.alert-danger', "No schedules meet your requirements.");
                         generating.stop();
                         return;
-                    } 
+                    }
 
                     // Set global itineraries
                     itineraries = buildItineraries(data);
+
+                    // Add current state to page history
+                    history.pushState({"data" : itineraries.get_state()}, '', '');
 
                     // Show first itinerary
                     showItinerary();
@@ -930,14 +1040,14 @@ $(document).ready(function() {
     function showItinerary() {
         var schedule_table = $('#schedule');
         var cells = schedule_table.find('[class*=cell_]');
+        var p_index = $('.program_index');
 
         // Clear calendar
         cells.text('');
-        cells.removeClass('hidden');
         cells.css({"background-color" : "", "color" : ""});
         cells.height('auto');
 
-        // If some itineraries filtered are available
+        // If any itineraries are available for display
         if (itineraries.get_count() > 0) {
             // Get itinerary
             var activities = itineraries.get_activities();
@@ -971,17 +1081,23 @@ $(document).ready(function() {
                     max_h = Math.max(h, max_h);
                 }
             }
+
+            // Set all activity divs to have the same height
+            cells.height(max_h + "px");
+            cells.removeClass('hidden');
         } else {
             cells.addClass('hidden'); // hide cells
         }
 
-        // Update itinerary counter
-        var filtered = itineraries.is_filtered() ? '<strong>Filtered: </strong>' : '';
-        var index = itineraries.get_count() == 0 ? 0 : itineraries.get_index() + 1;
-        $('.program_index').html(filtered + index + ' of ' + itineraries.get_count());
-
-        // Set all activity divs to have the same height
-        cells.height(max_h + "px");
+        // If itinerary is not null
+        if (itineraries.get_unfiltered_count() > 0) {
+            // Update itinerary counter
+            var filtered = itineraries.is_filtered() ? '<strong>Filtered: </strong>' : '';
+            var index = itineraries.get_count() == 0 ? 0 : itineraries.get_index() + 1;
+            p_index.html(filtered + index + ' of ' + itineraries.get_count());
+        } else {
+            p_index.html('&nbsp;'); // reset counter
+        }
     }
 
     // truncate given string to the given size
@@ -1001,7 +1117,7 @@ $(document).ready(function() {
 
     // fill activity form w/ the given contents (json array) 
     function generateActivities(contents) {
-        var size = contents.size; // # of activities in array
+        var size = contents.activities.length; // # of activities in array
 
         // check json length
         if (size == undefined || size < 1) {
@@ -1016,24 +1132,26 @@ $(document).ready(function() {
         }
 
         // get activity objects (w/ newly added)
-        var activities = $('.activity');
+        var activity_lines = $('.activity');
 
         // iterate over activities in imported file, add contents to form
         for (var i = 0; i < size; i++) {
-            var activity = activities.eq(i);
-            var slots = contents["slots_" + i];
-            activity.find('.act_code').val(contents["code_" + i]);
-            activity.find('.act_name').val(contents["name_" + i]);
-            activity.find('.act_category').val(contents["category_" + i]);
-            activity.find('.act_slot_selector').val(slots);
-            setCustomSelections(activity.find('.multi_select'), slots);
-            activity.find('.act_length').val(contents["length_" + i]);
-            activity.find('.selected_slots').val(slots.join("\n"));
+            var activity_line = activity_lines.eq(i);
+            var activity = contents["activities"][i];
+            var slots = activity["slots"];
+
+            activity_line.find('.act_code').val(activity["code"]);
+            activity_line.find('.act_name').val(activity["name"]);
+            activity_line.find('.act_category').val(activity["category"]);
+            activity_line.find('.act_slot_selector').val(slots);
+            setCustomSelections(activity_line.find('.multi_select'), slots);
+            activity_line.find('.act_length').val(activity["len"]);
+            activity_line.find('.selected_slots').val(slots.join("\n"));
         }
 
         // remove any extra activities smoothly
-        for (var i = (activities.length - 1); i >= size; i--) {
-            removeActivity(activities.eq(i));
+        for (var i = (activity_lines.length - 1); i >= Math.max(size, 1); i--) {
+            removeActivity(activity_lines.eq(i));
         }
     }
 
@@ -1085,13 +1203,14 @@ $(document).ready(function() {
 
         // add lines to document
         lines.each(function () {
-            $(this).insertAfter(last_line);
-            $('<div class="f_act_spacer spacer50 content-desktop"></div>').insertBefore(this);
+            $(this).insertAfter(last_line.next('hr'));
+            $('<hr class="w-90-pc mtb-2_em">').insertAfter(this);
         });
     }
 
     // create the given options for the given mobile select (jquery obj)
-    function createOptionsMobileSelect(select, options) {
+    // all options except given unselected (if any) will be selected by default
+    function createOptionsMobileSelect(select, options, unselected = []) {
         select.empty(); // remove existing options
 
         // for each slot option
@@ -1102,7 +1221,11 @@ $(document).ready(function() {
             // add option to select
             var option = $('<option value="' + value + '">' + value + '</option>');
             option.appendTo(select);
-            option.prop('selected', true);
+
+            // if not in unselected array, select by default
+            if (unselected.indexOf(options[i]) === -1) {
+                option.prop('selected', true);
+            }
         }
     }
 
@@ -1186,17 +1309,5 @@ $(document).ready(function() {
 
         document.body.removeChild(element);
     }
-
-
-    ////////// Random Fixes ////////////
-
-
-    // On mobile, handle url bar disappearing
-    function resizeBackground() {
-        $('#filter_pane').height( $(window).height() + 60);
-    }
-    
-    $(window).resize(resizeBackground);
-    resizeBackground();
 
 });

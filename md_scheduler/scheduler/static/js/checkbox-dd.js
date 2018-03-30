@@ -88,7 +88,8 @@ function filterCustomSelectHandler(checkbox) {
 };
 
 // Create given selector options for given jquery object (multi_select div)
-function createCustomOptions(multi_select, options) {
+// all options except given unselected (if any) will be selected by default
+function createCustomOptions(multi_select, options, unselected = []) {
     var multi_options = multi_select.find('.multi_options');
 
     multi_options.empty(); // remove options
@@ -97,6 +98,7 @@ function createCustomOptions(multi_select, options) {
     for (var i = 0; i < options.length; i++) {
         // convert option index to text
         var value = slot_converter.id_to_text(options[i]);
+        // var value = options[i];
 
         // add option to corresponding multi select
         var option = $('<label class="check_label">' +
@@ -104,11 +106,15 @@ function createCustomOptions(multi_select, options) {
                             '<span class="checkmark"></span>' + value +
                         '</label>');
         option.appendTo(multi_options);
-        option.find('input[type="checkbox"]').prop('checked', true);
+
+        // if not in unselected array, check by default
+        if (unselected.indexOf(options[i]) === -1) {
+            option.find('input[type="checkbox"]').prop('checked', true);
+        }
     }
 
     // update selector text
-    updateCustomSelectorText(multi_select, options.length);
+    updateCustomSelectorText(multi_select, options.length - unselected.length);
 
     // register event handler for custom click
     $('.f_activity .multi_options input[type="checkbox"]').on('click', function() {
@@ -140,6 +146,9 @@ $(document).ready(function() {
             },
             text_to_id: function(text) {
                 return text_to_id[text];
+            },
+            get_end_slot: function(text, length) {
+                return id_to_text[text_to_id[text] + length];
             }
         }
     })();
