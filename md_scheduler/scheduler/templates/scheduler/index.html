@@ -51,15 +51,56 @@
     </nav>
 
     <main role="main" class="container">
+        {# filter side pane #}
+        <div id="filter_pane" class="side-nav">
+            <a href="#" class="" id="close_filter">&times;</a>
+            <div class="row f_activity mt-4">
+                <div class="col-md-1">
+                </div>
+                <div class="col-md-3">
+                    <h5 class="f_act_name txt-w mb-3"></h5>
+                </div>
+                <div class="col-md-3 flex-center">
+                    <div class="multi_select content-desktop w-70-pc"> 
+                        <div class="select_box">
+                            <select class="form-control">
+                                <option value="" class="hidden" disabled selected>Select...</option>
+                            </select>
+                        </div>
+                        <div class="multi_options">
+                        </div>
+                    </div>
+                    <select class="f_act_slot_selector form-control content-mobile mb-3" multiple>
+                    </select>
+                </div>
+                <div class="col-md-4 f_slot_corral">
+                    <div>
+                        <div class="top_div">
+                        </div>
+                        <div class="bottom_div center">
+                            <a role="button" class="btn btn-secondary f_add_all txt-w in-blk center">Add all</a>
+                            <a role="button" class="btn btn-secondary f_remove_all txt-w ml-5 in-blk center">Remove all</a>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-1">
+                </div>
+            </div>
+            <hr class="w-90-pc mtb-2_em">
+            <div class="row">
+                <div class="col-md-12 center">
+                    <a role="button" class="btn btn-primary txt-w mb-5" id="apply_filter">Apply filters</a>
+                </div>
+            </div>
+        </div>
+
         {# alerts #}
         <div class="alert alert-success alert-custom hidden" role="alert">
-            <!-- dismissable option -->
-            <a href="#" class="close">&times;</a>
+            <a href="#" class="close close_alert">&times;</a>
             <strong>Success!</strong>
         </div>
         <div class="alert alert-danger alert-custom hidden" role="alert">
-            <!-- dismissable option -->
-            <a href="#" class="close">&times;</a>
+            <a href="#" class="close close_alert">&times;</a>
             <strong>Error!</strong>
         </div>
 
@@ -413,6 +454,7 @@
         {# next, prev navigation #}
         <div class="row content-desktop">
             <div class="col-md-3">
+                <a role="button" class="btn btn-secondary filter_program txt-w">Filter Schedule</a>
             </div>
             <div class="col-md-2">
                 <a href="#" class="prev_program">&larr; Previous</a>
@@ -431,14 +473,17 @@
         {# next, prev navigation #}
         <div class="content-mobile">
             <div class="row">
-                <div class="col-md-2 center">
+                <div class="col-md-12 center">
                     <a href="#" class="prev_program float-l">&larr; Previous</a>
                     <span class="program_index">&nbsp;</span>
                     <a href="#" class="next_program float-r">Next &rarr;</a>
                 </div>
             </div>
-                <div class="row">
-                    <div class="col-md-2 flex-center">
+            <div class="row">
+                <div class="col-md-6 flex-center">
+                    <a role="button" class="btn btn-secondary filter_program txt-w mt-3">Filter Schedule</a>
+                </div>
+                <div class="col-md-6 flex-center">
                     <a role="button" class="btn btn-secondary copy_program txt-w mt-3">Copy Schedule</a>
                 </div>
             </div>
@@ -452,8 +497,8 @@
         <div class="container">
             <div class="row import-export">
                 <div class="col-md-12 mb-4">
-                    <a role="button" class="btn btn-secondary export_acts txt-w">Export</a>
-                    <a role="button" class="btn btn-secondary import_acts txt-w ml-5">Import</a>
+                    <a role="button" id="export_acts" class="btn btn-secondary txt-w">Export</a>
+                    <a role="button" id="import_acts" class="btn btn-secondary txt-w ml-5">Import</a>
                     <input type="file" class="hidden" id="file_input" />
                 </div>
             </div>
@@ -489,6 +534,7 @@
                     <div class="col-md-1 mb-4">
                         <span class="txt-gold content-mobile">
                             <h5>Code</h5>
+                            <a href="#" class="close remove_activity top-right hidden">&times;</a>
                         </span>
                         <input type="text" class="act_code form-control w-100-pc">
                     </div>
@@ -521,8 +567,10 @@
                             </div>
                             <div class="multi_options">
                                 {% for week in all_weeks %}
-                                    <label>
-                                        <input type="checkbox" value="{{ week }}" />{{ week }}
+                                    <label class="check_label">
+                                        <input type="checkbox" value="{{ week }}" />
+                                        <span class="checkmark"></span>
+                                        {{ week }}
                                     </label>
                                 {% endfor %}
                             </div>
@@ -551,7 +599,7 @@
                             <option value="7">7</option>
                             <option value="8">8</option>
                         </select>
-                        <a href="#" class="close remove_activity hidden">&times;</a>
+                        <a href="#" class="close remove_activity content-desktop hidden">&times;</a>
                     </div>            
                 </div>
             </div>
