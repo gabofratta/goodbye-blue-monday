@@ -11,14 +11,17 @@ def get_schedules(data):
 
     # Build a dict of activity data
     for i in range(size):
-        activities[i] = {"code" : data["code_" + str(i)], "name" : data["name_" + str(i)], 
-                         "category" : data["category_" + str(i)], 
-                         "slots" : [enums.Weeks[e].value for e in data["slots_" + str(i)]], 
-                         "len" : int(data["length_" + str(i)])}
+        activity = data["activities"][i]
+        activity["slots"] = [e.replace(" (", "_").replace(")", "") for e in activity["slots"]]
+        activities[i] = {"code" : activity["code"], "name" : activity["name"], "category" : activity["category"],
+                         "slots" : [enums.Weeks[e].value for e in activity["slots"]], "length" : int(activity["length"])}
+
+    # First activity
+    first = data["activities"][0]
 
     # Initialize itineraries with first activity
-    for slot in data["slots_0"]:
-        length = int(data["length_0"])
+    for slot in first["slots"]:
+        length = int(first["length"])
         start_week = enums.Weeks[slot].value
         weeks = [(start_week + i) for i in range(length)]
         itineraries.append([(0, weeks)])
@@ -29,8 +32,8 @@ def get_schedules(data):
     # For each activity after the first
     for i in range(1, size):
         new_itineraries = []
-        slots = data["slots_" + str(i)]
-        length = int(data["length_" + str(i)])
+        slots = data["activities"][i]["slots"]
+        length = int(data["activities"][i]["length"])
 
         # For each itinerary already in the list
         for j in range(len(itineraries)):
@@ -63,8 +66,7 @@ def get_schedules(data):
         # Only interested in up to date itineraries
         itineraries = new_itineraries
 
-    ret_val = {"success": True}
-    x = 0
+    ret_val = {"success": True, "itineraries" : []}
 
     # For each itinerary
     for itinerary in itineraries:
@@ -77,8 +79,7 @@ def get_schedules(data):
             new_itinerary.append(new_activity)
 
         # Add itinerary to return array
-        ret_val["itinerary_" + str(x)] = new_itinerary
-        x += 1
+        ret_val["itineraries"].append(new_itinerary)
 
-    ret_val["size"] = x
+    ret_val["size"] = len(ret_val["itineraries"])
     return ret_val

@@ -4,9 +4,7 @@ function resetCustomSelector(multi_select) {
     multi_select.find('.multi_options').hide();
 
     // Uncheck everything
-    multi_select.find('.multi_options input[type="checkbox"]').each(function (index) {
-        $(this).prop('checked', false);
-    });
+    multi_select.find('.multi_options input[type="checkbox"]').prop('checked', false);
 
     // Reset default option text
     multi_select.find('option').text('Select...');
@@ -37,25 +35,6 @@ function updateCustomSelectorText(multi_select, selections) {
     }
 }
 
-// Remove '1' from selector text for given jquery object (multi_select div)
-function decreaseCustomSelectorText(multi_select) {
-    var option = multi_select.find('option'); // default option
-
-    // Set selector text
-    if (option.text() == "Select...") {
-        return; // none selected
-    } else {
-        // Get currently selected quantity
-        var quantity = option.text().substring(0, 1);
-
-        if (quantity == 1) {
-            option.text("Select..."); // none selected
-        } else {
-            option.text((quantity - 1) + ' selected'); // updated quantity
-        }
-    }
-}
-
 // Handle checkbox toggle in filter pane
 function filterCustomSelectHandler(checkbox) {
     var checked = [];
@@ -75,16 +54,8 @@ function filterCustomSelectHandler(checkbox) {
     // Update mobile select
     multi_select.next('.f_act_slot_selector').val(checked);
 
-    // iterate over links in corral
-    multi_select.parent().next().find('.top_div .start_tag').each(function() {
-        if (checked.indexOf($(this).text()) === -1) {
-            // if link is not selected, hide it
-            $(this).parents('.tag').hide();
-        } else {
-            // if link is selected, show it
-            $(this).parents('.tag').show();
-        }
-    });
+    // update links in corral
+    setCorralValues(multi_select.parent().next(), checked);
 };
 
 // Create given selector options for given jquery object (multi_select div)
@@ -96,14 +67,10 @@ function createCustomOptions(multi_select, options, unselected = []) {
 
     // iterate over this activity's given options
     for (var i = 0; i < options.length; i++) {
-        // convert option index to text
-        var value = slot_converter.id_to_text(options[i]);
-        // var value = options[i];
-
         // add option to corresponding multi select
         var option = $('<label class="check_label">' +
-                            '<input type="checkbox" value="' + value + '" />' +
-                            '<span class="checkmark"></span>' + value +
+                            '<input type="checkbox" value="' + options[i] + '" />' +
+                            '<span class="checkmark"></span>' + options[i] +
                         '</label>');
         option.appendTo(multi_options);
 
@@ -122,36 +89,21 @@ function createCustomOptions(multi_select, options, unselected = []) {
     });
 }
 
-var slot_converter; // add to scope
+// update displayed links in filter pane corral
+function setCorralValues(corral, values) {
+    corral.find('.top_div .start_tag').each(function() {
+        if (values.indexOf($(this).text()) === -1) {
+            // if link is not selected, hide it
+            $(this).parents('.tag').animate({width:'hide'});
+        } else {
+            // if link is selected, show it
+            $(this).parents('.tag').animate({width:'show'});
+        }
+    });
+}
 
 
 $(document).ready(function() {
-
-    // time slot id to text lookup
-    slot_converter = (function() {
-        var id_to_text = {};
-        var text_to_id = {};
-
-        // create id to text, text to id maps
-        $('.act_slot_selector').first().children().each(function (index) {
-            var value = $(this).val();
-            id_to_text[index + 1] = value;
-            text_to_id[value] = index + 1;
-        })
-
-        // return the text at the given index
-        return {
-            id_to_text: function(index) {
-                return id_to_text[index];
-            },
-            text_to_id: function(text) {
-                return text_to_id[text];
-            },
-            get_end_slot: function(text, length) {
-                return id_to_text[text_to_id[text] + length];
-            }
-        }
-    })();
 
     // Open/close options 
     $('.select_box').on('click', function() {
