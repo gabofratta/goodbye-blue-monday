@@ -94,10 +94,10 @@ function setCorralValues(corral, values) {
     corral.find('.top_div .start_tag').each(function() {
         if (values.indexOf($(this).text()) === -1) {
             // if link is not selected, hide it
-            $(this).parents('.tag').animate({width:'hide'});
+            $(this).parents('.tag').fadeOut(300);
         } else {
             // if link is selected, show it
-            $(this).parents('.tag').animate({width:'show'});
+            $(this).parents('.tag').fadeIn(300);
         }
     });
 }
@@ -138,7 +138,7 @@ $(document).ready(function() {
     });
 
     // Close options on click away
-    $(document).bind('click', function(e) {
+    $(document).bind('click', function(e) { //TODO optimize
         var clicked = $(e.target);
         if (!clicked.parents().hasClass('multi_select')) {
             $('.multi_options').hide();

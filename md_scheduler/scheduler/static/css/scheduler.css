@@ -168,6 +168,8 @@ input.form-control {
     background-color: #eceff1;
     border-radius: 0.4em;
     font-size: smaller;
+    padding-left: 1px;
+    padding-right: 1px;
 }
 
 .copy_program {
