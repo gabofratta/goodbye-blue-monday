@@ -1196,7 +1196,7 @@ $(document).ready(function() {
         lines = lines.add(new_line);
 
         // add any extra lines
-        while (var i = 1; i < count; i++) {
+        for (var i = 1; i < count; i++) {
             var extra_line = new_line.clone(true);
             lines = lines.add(extra_line);
         }
