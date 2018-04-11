@@ -35,9 +35,9 @@ def generate_programs(request):
     # return programs
     try:
         data = helpers.get_schedules(params)
+        return JsonResponse(data)
     except Exception as ex:
         data = {"success" : False, "error" : """Exception: %s.""" % ex.__class__.__name__ }
-    finally:
         return JsonResponse(data)
 
 

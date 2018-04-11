@@ -48,7 +48,6 @@ function buildItineraries(data) {
 
     var filtered_count = count;
     var filtered_itineraries = [];
-    var is_filter_ready = false;
 
     // array of activity names
     var activity_names = [];
@@ -58,8 +57,6 @@ function buildItineraries(data) {
     var activity_lengths = {};
     // map of activity name to start slots to itineraries in which they are used
     var activity_slot_itineraries = {};
-    // map of currently filtered out slots for each activity
-    var activity_fo_slots = {};
 
     // iterate over itineraries
     for (var i = 0; i < count; i++) {
@@ -74,7 +71,6 @@ function buildItineraries(data) {
                 activity_slots[activity.name] = [];
                 activity_lengths[activity.name] = activity.length;
                 activity_slot_itineraries[activity.name] = {};
-                activity_fo_slots[activity.name] = [];
             }
 
             // if new slot, initialize objects/arrays
@@ -119,22 +115,10 @@ function buildItineraries(data) {
         get_activities: function() {
             return deepCopy(filtered_itineraries[index]);
         },
-        filter_ready: function() {
-            is_filter_ready = true;
-        },
-        is_filter_ready: function() {
-            return is_filter_ready;
-        },
         reset_filter: function() {
             filtered_itineraries = deepCopy(itineraries);
             filtered_count = count;
             index = 0;
-        },
-        set_filter: function(filter_list) {
-            activity_fo_slots = deepCopy(filter_list);
-        },
-        get_filtered_for: function(activity) {
-            return activity_fo_slots[activity].slice();
         },
         filter_out: function(remove_list) {
             // sort itinerary ids
@@ -163,35 +147,7 @@ function buildItineraries(data) {
             return activity_names.slice();
         },
         get_itineraries_for: function(activity_name, slot) {
-            return activity_slot_itineraries[activity_name][slot];
-        },
-        // manage state for page history
-        get_state: function() {
-            return {
-                "count" : count,
-                "index" : index,
-                "itineraries" : itineraries,
-                "filtered_count" : filtered_count,
-                "filtered_itineraries" : filtered_itineraries,
-                "activity_names" : activity_names,
-                "activity_slots" : activity_slots,
-                "activity_lengths" : activity_lengths,
-                "activity_slot_itineraries" : activity_slot_itineraries,
-                "activity_fo_slots" : activity_fo_slots
-            };
-        },
-        set_state: function(data) {
-            count = data.count;
-            index = data.index;
-            itineraries = data.itineraries;
-            filtered_count = data.filtered_count;
-            filtered_itineraries = data.filtered_itineraries;
-            is_filter_ready = false;
-            activity_names = data.activity_names;
-            activity_slots = data.activity_slots;
-            activity_lengths = data.activity_lengths;
-            activity_slot_itineraries = data.activity_slot_itineraries;
-            activity_fo_slots = data.activity_fo_slots;
+            return activity_slot_itineraries[activity_name][slot].slice();
         }
     };
 }
@@ -234,7 +190,7 @@ $(document).ready(function() {
                           ["LIME", "BLACK"], ["AQUA", "BLACK"], ["FUCHSIA", "BLACK"],
                           ["ORANGE", "BLACK"], ["PINK", "BLACK"], ["SILVER", "BLACK"]];
 
-    $('#filter_pane').children().hide(); // to allow initial fade in
+    $('#filter_contents').hide(); // to allow initial fade in
 
 
     /////////////////////////////////////
@@ -245,10 +201,13 @@ $(document).ready(function() {
     ///////// User navigation /////////
 
     // set current state to page history
-    history.replaceState({"data" : itineraries.get_state()}, '', '');
+    history.replaceState({"data" : {"size" : 0, "activities" : []}}, '', '');
 
     // listen on user click back, fwd buttons
     window.addEventListener("popstate", function(e) {
+        // close custom select
+        $('.multi_options').hide();
+
         // get state
         var state = e.state;
 
@@ -257,37 +216,20 @@ $(document).ready(function() {
 
         // if there is a previous state
         if (state !== null) {
-            // set itineraries object
-            itineraries.set_state(state.data);
-
-            // show itinerary
-            showItinerary();
-
             // if any activities
-            if (itineraries.get_activity_count() > 0) {
-                // get activities
-                var contents = {"activities" : itineraries.get_activities(), size : itineraries.get_activity_count()}; // TODO optimize
-
-                // get slots and convert format
-                for (var i = 0; i < contents.activities.length; i++) {
-                    contents.activities[i]["slots"] = itineraries.get_activity_slots(contents.activities[i]["name"])
-                                                                 .map(slot_converter.id_to_text);
-                }
-
-                // set activities
-                generateActivities(contents);
+            if (state.data.size > 0) {
+                // set activities and generate itineraries
+                generateActivities(state.data);
+                generatePrograms(true, state.data);
             } else {
-                // clear activities
+                // clear activities and itinerary
                 resetActivities();
+                itineraries = buildItineraries({"size" : 0, "itineraries" : []});
+                showItinerary(false);
             }
         }
 
         return false;
-    });
-
-    // save state before navigating away
-    window.addEventListener("beforeunload", function () {
-        history.pushState({"data" : itineraries.get_state()}, '', '');
     });
 
 
@@ -323,7 +265,7 @@ $(document).ready(function() {
         itineraries.prev();
 
         // Show new itinerary
-        showItinerary();
+        showItinerary(true);
 
         return false;
     });
@@ -342,7 +284,7 @@ $(document).ready(function() {
         itineraries.next();
 
         // Show new itinerary
-        showItinerary();
+        showItinerary(true);
 
         return false;
     });
@@ -361,7 +303,7 @@ $(document).ready(function() {
         itineraries.prev();
 
         // Show new itinerary
-        showItinerary();
+        showItinerary(true);
 
         return false;
     });
@@ -380,7 +322,7 @@ $(document).ready(function() {
         itineraries.next();
 
         // Show new itinerary
-        showItinerary();
+        showItinerary(true);
 
         return false;
     });
@@ -585,79 +527,13 @@ $(document).ready(function() {
         $('.alert').fadeOut();
 
         // show filter pane
-        var filter_pane = $('#filter_pane');
-        filter_pane.css("width", "100%")
-                   .children().fadeIn(500);
+        $('#filter_pane').css("width", "100%");
+        $('#filter_contents').fadeIn(1250);
 
         // prevent scroll and page jump
         var scroll_width = window.innerWidth - $(document).width();
         $('body').css({"overflow" : "hidden", "margin-right" : scroll_width + "px"});
         $('nav').css({"left" : -scroll_width + "px"});
-
-        // if the itinerary filter is not ready
-        if (!itineraries.is_filter_ready()) {
-            // set filter ready
-            itineraries.filter_ready();
-
-            // get objects
-            var activity_lines = filter_pane.find('.f_activity');
-            var activity_names = itineraries.get_activity_names();
-            var new_lines = activity_names.length - activity_lines.length;
-
-            // add activities to be filtered
-            if (new_lines > 0) {
-                addFilterLines(new_lines);
-            }
-
-            // remove any extra lines
-            for (var i = (activity_lines.length - 1); i >= activity_names.length; i--) {
-                activity_lines.eq(i).remove();
-            }
-
-            activity_lines = filter_pane.find('.f_activity'); // updated lines
-
-            // set values for each activity
-            activity_lines.each(function (index) {
-                var activity = activity_names[index];
-                var length = itineraries.get_activity_length(activity);
-                var slots = itineraries.get_activity_slots(activity)
-                                       .map(slot_converter.id_to_text);
-                var unselected = itineraries.get_filtered_for(activity)
-                                            .map(slot_converter.id_to_text);
-
-                // set activity name
-                $(this).find('.f_act_name').text(activity);
-
-                // set multi select options for activity
-                createCustomOptions($(this).find('.multi_select'), slots, unselected);
-
-                // set mobile options for activity
-                createOptionsMobileSelect($(this).find('.f_act_slot_selector'), slots, unselected);
-
-                // empty tag container
-                var top_div = $(this).find('.top_div');
-                top_div.empty();
-
-                // set corral to have all options
-                for (var i = 0; i < slots.length; i++) {
-                    var tag = $('<div class="tag"><span class="start_tag">' + slots[i] + '</span>' +
-                                '<span>&nbsp;-&nbsp;' + slot_converter.get_end_slot(slots[i], length) + '</span>' + 
-                                '<a href="#" class="close remove_tag">&times;</a></div>');
-                    top_div.append(tag);
-
-                    // if unselected, hide
-                    if (unselected.indexOf(slots[i]) !== -1) {
-                        tag.hide();
-                    }
-                }
-
-                // register click event on tag removing 'x'
-                $('.remove_tag').click(function () {
-                    removeTagHandler($(this).parents('.tag'));
-                    return false;
-                })
-            });
-        }
 
         return false;
     });
@@ -737,28 +613,22 @@ $(document).ready(function() {
         }
         filtering.start();
 
-        // show loading overlay after 0.5 secs
-        var loadingTO = setTimeout(function() {
-            $('.loading').removeClass('hidden');
-        }, 500);
+        // show loading overlay
+        $('.loading').removeClass('hidden');
 
         itineraries.reset_filter(); // reset filter
-
         var remove_list = [];
-        var remove_map = {}; // TODO optimize
-        var filter_list = {};
+        var remove_map = {};
         
         // for each activity
         $('.f_activity').each(function (index) {
             var unselected = $(this).find('.f_act_slot_selector option:not(:selected)');
             var activity = $(this).find('.f_act_name').text();
-            filter_list[activity] = [];
             
             // for each unselected slot
             unselected.each(function (i) {
                 var slot_id = slot_converter.text_to_id($(this).val());
                 var itinerary_ids = itineraries.get_itineraries_for(activity, slot_id);
-                filter_list[activity].push(slot_id);
                 
                 // for each pertinent itinerary
                 for (var i = 0; i < itinerary_ids.length; i++) {
@@ -771,15 +641,11 @@ $(document).ready(function() {
             });
         });
 
-        itineraries.set_filter(filter_list); // store filters
         itineraries.filter_out(remove_list); // filter itineraries
-        showItinerary(); // update schedule table
-
-        // add current state to page history
-        history.pushState({"data" : itineraries.get_state()}, '', '');
+        showItinerary(false); // update schedule table
 
         // hide loader
-        hideLoader(loadingTO);
+        $('.loading').addClass('hidden');
 
         // hide filter pane
         closeFilterPane();
@@ -795,6 +661,7 @@ $(document).ready(function() {
     ////////// Generate Schedules ///////////
 
 
+    // Generate possible itineraries for the activities in the form
     $('#generate').click(function () {
         // close custom select
         $('.multi_options').hide();
@@ -805,6 +672,25 @@ $(document).ready(function() {
         }
         generating.start();
 
+        // generate programs in backend
+        generatePrograms(false, {"size" : 0});
+
+        return false;
+    });
+
+
+    ///////////////////////////////
+    ////////// Helpers ////////////
+    ///////////////////////////////
+
+
+    ////////// Generate Schedules ///////////
+
+
+    // Generate possible itineraries for the given activities. If none given,
+    // use activities in the form. The is_trigger argument indicates whether user
+    // click or programatic call.
+    function generatePrograms(is_trigger, activities) {
         // dismiss alerts
         $('.alert-success').fadeOut();
 
@@ -815,28 +701,37 @@ $(document).ready(function() {
         $('.program_index').html('&nbsp;');
 
         // reset schedule table
-        var cells = $('#schedule').find('[class*=cell_]');
-        cells.text('')
-             .addClass('hidden');
+        $('#schedule').find('.activity_display').text('')
+                                                .hide();
 
         // get and validate activity info
-        var export_val = getAndValidateActivities();
+        if (activities.size === 0) {
+            var form_val = getAndValidateActivities();
+        } else {
+            // use given activities (from history)
+            form_val = activities;
+        }
 
         // if data is valid
-        if (export_val.size > 0) {
+        if (form_val.size > 0) {
             // dismiss alert
             $('.alert-danger').fadeOut();
 
-            // show loading overlay after 0.5 secs
+            // show loading overlay after 0.3 secs
             var loadingTO = setTimeout(function() {
                 $('.loading').removeClass('hidden');
-            }, 500);
+            }, 300);
+
+            // Add current state to page history
+            if (!is_trigger) {
+                history.pushState({"data" : form_val}, '', '');
+            }
 
             // ajax post request
             $.ajax({
                 url: "/ajax/generate_programs",
                 type: "POST",
-                data: JSON.stringify(export_val),
+                data: JSON.stringify(form_val),
                 dataType: 'json',
                 success: function(data, status) {
                     // Show error if success is False
@@ -858,14 +753,16 @@ $(document).ready(function() {
                     // Set global itineraries
                     itineraries = buildItineraries(data);
 
-                    // Add current state to page history
-                    history.pushState({"data" : itineraries.get_state()}, '', '');
+                    // Fill filter pane
+                    fillFilterPane();
 
                     // Show first itinerary
-                    showItinerary();
+                    showItinerary(false);
 
-                    // Hide loader, show success alert
+                    // Hide loader
                     hideLoader(loadingTO);
+
+                    // Show success alert
                     setAlert('.alert-success', "Your schedule options are ready.");
                     generating.stop();
                 },
@@ -879,14 +776,7 @@ $(document).ready(function() {
         } else {
             generating.stop();
         }
-
-        return false;
-    });
-
-        
-    ///////////////////////////////
-    ////////// Helpers ////////////
-    ///////////////////////////////
+    }
 
 
     /////////// Loader ////////////
@@ -975,14 +865,18 @@ $(document).ready(function() {
 
 
     // show the itinerary at the current index on the schedule table
-    function showItinerary() {
+    // toggle argument indicates whether calling from a prev/next event -  no need to recalculate size
+    function showItinerary(toggle) {
         var schedule_table = $('#schedule');
-        var cells = schedule_table.find('[class*=cell_]');
+        var cells = schedule_table.find('.activity_display');
 
         // Clear calendar
         cells.text('')
-             .css({"background-color" : "", "color" : ""})
-             .height('auto');
+             .css({"background-color" : "", "color" : ""});
+
+        if (!toggle) {
+            cells.height('auto');
+        }
 
         // If any itineraries are available for display
         if (itineraries.get_count() > 0) {
@@ -1013,15 +907,19 @@ $(document).ready(function() {
                            .css("color", default_colors[j][1]);
                     }
 
-                    // Compare activity div height to current max
-                    var h = schedule_table.find('.row_' + row + ':visible').find('.month_' + month).find('.cell_' + cell).height(); // TODO optimize
-                    max_h = Math.max(h, max_h);
+                    if (!toggle) {
+                        // Compare activity div height to current max
+                        var h = schedule_table.find('.row_' + row + ':visible').find('.month_' + month).find('.cell_' + cell).height();
+                        max_h = Math.max(h, max_h);
+                    }
                 }
             }
 
-            // Set all activity divs to have the same height
-            cells.height((max_h + 1) + "px")
-                 .show();
+            if (!toggle) {
+                // Set all activity divs to have the same height
+                cells.height((max_h + 1) + "px")
+                     .show();
+            }
         } else {
             cells.hide(); // hide cells
         }
@@ -1075,14 +973,14 @@ $(document).ready(function() {
         for (var i = 0; i < size; i++) {
             var activity_line = activity_lines.eq(i);
             var activity = contents["activities"][i];
-            var slots = activity["slots"].map(sanitize);
+            var slots = activity["slots"];
 
-            activity_line.find('.act_code').val(sanitize(activity["code"]));
-            activity_line.find('.act_name').val(sanitize(activity["name"]));
-            activity_line.find('.act_category').val(sanitize(activity["category"]));
+            activity_line.find('.act_code').val(activity["code"]);
+            activity_line.find('.act_name').val(activity["name"]);
+            activity_line.find('.act_category').val(activity["category"]);
             activity_line.find('.act_slot_selector').val(slots);
             setCustomSelections(activity_line.find('.multi_select'), slots);
-            activity_line.find('.act_length').val(sanitize(String(activity["length"])));
+            activity_line.find('.act_length').val(activity["length"]);
             activity_line.find('.selected_slots').val(slots.join("\n"));
         }
 
@@ -1108,20 +1006,6 @@ $(document).ready(function() {
         for (var i = 1; i < activities.length; i++) {
             removeActivity(activities.eq(i));
         }
-    }
-
-    // escape special characters in user input
-    function sanitize(input) { // TODO fix display
-        const map = {
-            '&': '&amp;',
-            '<': '&lt;',
-            '>': '&gt;',
-            '"': '&quot;',
-            "'": '&#x27;',
-            "/": '&#x2F;',
-        };
-        const reg = /[&<>"'/]/ig;
-        return input.replace(reg, (match)=>(map[match]));
     }
 
     // build an object with info from activity form and return it, if valid
@@ -1172,11 +1056,70 @@ $(document).ready(function() {
         }
 
         // return invalid
-        return {"size" : 0};
+        return {"size" : 0, "activities" : []};
     }
 
 
     ///////////// Filtering ////////////
+
+
+    // create filter pane objects for a set of itineraries
+    function fillFilterPane() {
+        var filter_pane = $('#filter_pane');
+
+        // get objects
+        var activity_lines = filter_pane.find('.f_activity');
+        var activity_names = itineraries.get_activity_names();
+        var new_lines = activity_names.length - activity_lines.length;
+
+        // add activities to be filtered
+        if (new_lines > 0) {
+            addFilterLines(new_lines);
+        }
+
+        // remove any extra lines
+        for (var i = (activity_lines.length - 1); i >= activity_names.length; i--) {
+            activity_lines.eq(i).next('hr').remove();
+            activity_lines.eq(i).remove();
+        }
+
+        activity_lines = filter_pane.find('.f_activity'); // updated lines
+
+        // set values for each activity
+        activity_lines.each(function (index) {
+            var activity = activity_names[index];
+            var length = itineraries.get_activity_length(activity);
+            var slots = itineraries.get_activity_slots(activity)
+                                   .map(slot_converter.id_to_text);
+
+            // set activity name
+            $(this).find('.f_act_name').text(activity);
+
+            // set multi select options for activity
+            createCustomOptions($(this).find('.multi_select'), slots);
+
+            // set mobile options for activity
+            createOptionsMobileSelect($(this).find('.f_act_slot_selector'), slots);
+
+            // empty tag container
+            var top_div = $(this).find('.top_div');
+            top_div.empty();
+
+            // set corral to have all options
+            for (var i = 0; i < slots.length; i++) {
+                var tag = $('<div class="tag"><span class="start_tag">' + slots[i] + '</span>' +
+                            '<span>&nbsp;-&nbsp;' + slot_converter.get_end_slot(slots[i], length) + '</span>' +
+                            '<a href="#" class="close remove_tag">&times;</a></div>');
+                top_div.append(tag);
+            }
+
+            // register click event on tag removing 'x'
+            $('.remove_tag').click(function () {
+                removeTagHandler($(this).parents('.tag'));
+                return false;
+            })
+        });
+    }
 
 
     // create as many new lines on the filtering pane as the given count. Count >= 1.
@@ -1209,20 +1152,16 @@ $(document).ready(function() {
     }
 
     // create the given options for the given mobile select (jquery obj)
-    // all options except given unselected (if any) will be selected by default
-    function createOptionsMobileSelect(select, options, unselected = []) {
+    function createOptionsMobileSelect(select, options) {
         select.empty(); // remove existing options
 
         // for each slot option
         for (var i = 0; i < options.length; i++) {
             // add option to select
             var option = $('<option value="' + options[i] + '">' + options[i] + '</option>');
-            option.appendTo(select);
 
-            // if not in unselected array, select by default
-            if (unselected.indexOf(options[i]) === -1) {
-                option.prop('selected', true);
-            }
+            option.appendTo(select)
+                  .prop('selected', true);
         }
     }
 
@@ -1254,7 +1193,7 @@ $(document).ready(function() {
         var filter_pane = $('#filter_pane');
 
         // fade out contents
-        filter_pane.children().fadeOut(200);
+        $('#filter_contents').fadeOut(100);
 
         // hide filter pane
         filter_pane.css("width", "0");
@@ -1262,6 +1201,9 @@ $(document).ready(function() {
         // reset scrolling and page settings
         $('body').css({"overflow" : "auto", "margin-right" : "0"});
         $('nav').css({"left" : "0"});
+
+        // scroll to top of filter pane
+        filter_pane.scrollTop(0);
     }
 
 

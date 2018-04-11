@@ -59,8 +59,7 @@ function filterCustomSelectHandler(checkbox) {
 };
 
 // Create given selector options for given jquery object (multi_select div)
-// all options except given unselected (if any) will be selected by default
-function createCustomOptions(multi_select, options, unselected = []) {
+function createCustomOptions(multi_select, options) {
     var multi_options = multi_select.find('.multi_options');
 
     multi_options.empty(); // remove options
@@ -72,16 +71,13 @@ function createCustomOptions(multi_select, options, unselected = []) {
                             '<input type="checkbox" value="' + options[i] + '" />' +
                             '<span class="checkmark"></span>' + options[i] +
                         '</label>');
-        option.appendTo(multi_options);
 
-        // if not in unselected array, check by default
-        if (unselected.indexOf(options[i]) === -1) {
-            option.find('input[type="checkbox"]').prop('checked', true);
-        }
+        option.appendTo(multi_options)
+              .find('input[type="checkbox"]').prop('checked', true);
     }
 
     // update selector text
-    updateCustomSelectorText(multi_select, options.length - unselected.length);
+    updateCustomSelectorText(multi_select, options.length);
 
     // register event handler for custom click
     $('.f_activity .multi_options input[type="checkbox"]').on('click', function() {
@@ -138,7 +134,7 @@ $(document).ready(function() {
     });
 
     // Close options on click away
-    $(document).bind('click', function(e) { //TODO optimize
+    $(document).bind('click', function(e) {
         var clicked = $(e.target);
         if (!clicked.parents().hasClass('multi_select')) {
             $('.multi_options').hide();
