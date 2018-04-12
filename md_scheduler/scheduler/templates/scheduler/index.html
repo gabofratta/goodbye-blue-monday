@@ -10,14 +10,12 @@
     <link rel="shortcut icon" href="{%  static 'favicon.ico' %}"/>
 
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
-    <link rel="stylesheet" href="{% static 'css/checkbox-dd.css' %}">
-    <link rel="stylesheet" href="{% static 'css/scheduler.css' %}">
+    <link rel="stylesheet" href="{% static 'css/scheduler.min.css' %}">
 
     <script src="https://code.jquery.com/jquery-3.3.1.min.js" integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8=" crossorigin="anonymous"></script>
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/hammer.js/2.0.8/hammer.min.js" integrity="sha384-Cs3dgUx6+jDxxuqHvVH8Onpyj2LF1gKZurLDlhqzuJmUqVYMJ0THTWpxK5Z086Zm" crossorigin="anonymous"></script>
-    <script src="{% static 'js/checkbox-dd.js' %}"></script>
-    <script src="{% static 'js/scheduler.js' %}"></script>
+    <script src="{% static 'js/scheduler.min.js' %}"></script>
 
 </head>
 <body>
@@ -25,7 +23,7 @@
     {# top menu #}
     <nav class="navbar fixed-top navbar-expand-md navbar-dark bg-teal">
             <div class="container">
-                <a class="navbar-brand flex-link" href="#">
+                <a class="navbar-brand flex-link" href="/">
                     <img src="{%  static 'favicon_nav.ico' %}" height="24px" />
                     &nbsp;MS4 Planner
                 </a>
@@ -36,15 +34,15 @@
                     <!-- left navigation links -->
                     <ul class="navbar-nav mr-auto">
                         <!-- active navigation link -->
-                        <li class="nav-item active">
-                            <a class="nav-link" href="#">Home
+                        <!-- <li class="nav-item active">
+                            <a class="nav-link" href="/">Home
                                 <span class="sr-only">(current)</span>
                             </a>
-                        </li>
+                        </li> -->
                         <!-- regular navigation link -->
-                        <li class="nav-item">
+                        <!-- <li class="nav-item">
                             <a class="nav-link" href="./about">About</a>
-                        </li>
+                        </li> -->
                     </ul>
                 </div>
             </div>
@@ -661,9 +659,8 @@
                         <strong>Team</strong>
                     </h6>
                     <hr class="teal accent-3 mb-3 mt-0 d-inline-block mx-auto w-3_7-em">
-                    <p>Gabz</p>
-                    <p>Jor</p>
-                    <p>Stefi</p>
+                    <p class="mb-1">Gabo Frattallone</p>
+                    <p class="mb-1">Jorge Rosario</p>
                 </div>
 
                 <div class="col-md-1"></div>
@@ -673,8 +670,8 @@
                         <strong>Contact</strong>
                     </h6>
                     <hr class="teal accent-3 mb-3 mt-0 d-inline-block mx-auto w-3_7-em">
-                    <p>To report bugs or suggest features:</p>
-                    <p>info@example.com</p>
+                    <p class="mb-1">To report bugs or suggest features:</p>
+                    <a href="https://docs.google.com/forms/d/e/1FAIpQLSdjnfyYbkfnqmsk9rmgAqQXJ2p7xj7wSAyBjFNl0d2EVJQ9ow/viewform" target="_blank">Google Form</a>
                 </div>
 
             </div>

@@ -493,7 +493,7 @@ $(document).ready(function() {
         $('.multi_options').hide();
 
         // add a new acitivity
-        addActivity();
+        addActivity(1);
 
         return false;
     });    
@@ -816,7 +816,7 @@ $(document).ready(function() {
 
 
     // create as many new activity lines as the given count. Count >= 1.
-    function addActivity(count = 1) {
+    function addActivity(count) {
         // clone an activity line
         var last_activity = $('.activity').last();
         var new_activity = last_activity.clone(true);
@@ -1123,7 +1123,7 @@ $(document).ready(function() {
 
 
     // create as many new lines on the filtering pane as the given count. Count >= 1.
-    function addFilterLines(count = 1) {
+    function addFilterLines(count) {
         // clone last line
         var last_line = $('.f_activity').last();
         var new_line = last_line.clone(true);

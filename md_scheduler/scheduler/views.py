@@ -1,4 +1,5 @@
 from django.shortcuts import render
+from django.http import Http404
 from django.http import HttpResponse
 from django.http import JsonResponse
 from scheduler.utils import helpers
@@ -21,6 +22,10 @@ def index(request):
 
 
 def generate_programs(request):
+    # check ajax request
+    if not request.is_ajax():
+        raise Http404
+
     # check request type
     if request.method != "POST":
         return JsonResponse({"success": False, "error" : "Unexpected request."})
