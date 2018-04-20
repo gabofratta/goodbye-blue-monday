@@ -1,0 +1,682 @@
+<!DOCTYPE html>
+
+{% load staticfiles %}
+
+<html>
+<head>
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <link rel="shortcut icon" href="{%  static 'favicon.ico' %}"/>
+
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+    <link rel="stylesheet" href="{% static 'css/scheduler.min.css' %}">
+
+    <script src="https://code.jquery.com/jquery-3.3.1.min.js" integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8=" crossorigin="anonymous"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/hammer.js/2.0.8/hammer.min.js" integrity="sha384-Cs3dgUx6+jDxxuqHvVH8Onpyj2LF1gKZurLDlhqzuJmUqVYMJ0THTWpxK5Z086Zm" crossorigin="anonymous"></script>
+    <script src="{% static 'js/scheduler.min.js' %}"></script>
+
+</head>
+<body>
+
+    {# top menu #}
+    <nav class="navbar fixed-top navbar-expand-md navbar-dark bg-teal">
+            <div class="container">
+                <a class="navbar-brand flex-link" href="/">
+                    <img src="{%  static 'favicon_nav.ico' %}" height="24px" />
+                    &nbsp;MS4 Planner
+                </a>
+                <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarCollapse" aria-controls="navbarCollapse" aria-expanded="false" aria-label="Toggle navigation">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+                <div class="collapse navbar-collapse" id="navbarCollapse">
+                    <!-- left navigation links -->
+                    <ul class="navbar-nav mr-auto">
+                        <!-- active navigation link -->
+                        <!-- <li class="nav-item active">
+                            <a class="nav-link" href="/">Home
+                                <span class="sr-only">(current)</span>
+                            </a>
+                        </li> -->
+                        <!-- regular navigation link -->
+                        <!-- <li class="nav-item">
+                            <a class="nav-link" href="./about">About</a>
+                        </li> -->
+                    </ul>
+                </div>
+            </div>
+    </nav>
+
+    <main role="main" class="container">
+        {# filter side pane #}
+        <div id="filter_pane" class="side-nav">
+            <div id="filter_contents">
+                <a href="#" class="" id="close_filter">&times;</a>
+                <div class="row f_activity mt-4">
+                    <div class="col-md-1">
+                    </div>
+                    <div class="col-md-3">
+                        <h5 class="f_act_name txt-w mb-3"></h5>
+                    </div>
+                    <div class="col-md-3 flex-center">
+                        <div class="multi_select content-desktop w-70-pc">
+                            <div class="select_box">
+                                <select class="form-control">
+                                    <option value="" class="hidden" disabled selected>Select...</option>
+                                </select>
+                            </div>
+                            <div class="multi_options">
+                            </div>
+                        </div>
+                        <select class="f_act_slot_selector form-control content-mobile mb-3" multiple>
+                        </select>
+                    </div>
+                    <div class="col-md-4 f_slot_corral">
+                        <div>
+                            <div class="top_div">
+                            </div>
+                            <div class="bottom_div center">
+                                <a role="button" class="btn btn-secondary f_add_all txt-w in-blk center">Add all</a>
+                                <a role="button" class="btn btn-secondary f_remove_all txt-w ml-5 in-blk center">Remove all</a>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-1">
+                    </div>
+                </div>
+                <hr class="w-90-pc mtb-2_em">
+                <div class="row">
+                    <div class="col-md-12 center">
+                        <a role="button" class="btn btn-primary txt-w mb-5" id="apply_filter">Apply filters</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        {# alerts #}
+        <div class="alert alert-success alert-custom hidden" role="alert">
+            <a href="#" class="close close_alert">&times;</a>
+            <strong>Success!</strong>
+        </div>
+        <div class="alert alert-danger alert-custom hidden" role="alert">
+            <a href="#" class="close close_alert">&times;</a>
+            <strong>Error!</strong>
+        </div>
+
+        <div class="spacer20"></div>
+
+        {# next, prev navigation #}
+        <div class="row content-desktop">
+            <div class="col-md-3">
+            </div>
+            <div class="col-md-2">
+                <a href="#" class="prev_program">&larr; Previous</a>
+            </div>
+            <div class="col-md-2 center no-side-pd">
+                <span class="program_index"></span>
+            </div>
+            <div class="col-md-2 right">
+                <a href="#" class="next_program">Next &rarr;</a>
+            </div>
+        </div>
+
+        {# next, prev navigation #}
+        <div class="row content-mobile">
+            <div class="col-md-2 center">
+                <a href="#" class="prev_program float-l">&larr; Previous</a>
+                <span class="program_index">&nbsp;</span>
+                <a href="#" class="next_program float-r">Next &rarr;</a>
+            </div>
+        </div>
+
+        {# calendar #}
+        <div id="schedule">
+
+            <div class="content-desktop">
+                {# row 1 months #}
+                <div class="row">
+                    {% for month in row_1_months %}
+                        <div class="col-md-4 month center">
+                            {{ month.1 }}
+                        </div>
+                    {% endfor %}
+                </div>
+
+                {# row 1 weeks #}
+                <div class="row">
+                    {% for month in row_1_months %}
+                        <div class="col-md-4 week_block center">
+                        {% for week in row_weeks %}
+                            <div class="week">
+                                {{ week }}
+                            </div>
+                        {% endfor %}
+                        </div>
+                    {% endfor %}    
+                </div>
+
+                {# row 1 classes #}
+                <div class="row row_1">
+                    {% for month in row_1_months %}
+                        <div class="col-md-4 activity_block center month_{{month.0}}">
+                        {% for week in row_weeks %}
+                            <div class="activity_display hidden cell_{{week}}">
+                            </div>
+                        {% endfor %}
+                        </div>
+                    {% endfor %}    
+                </div>
+
+                <div class="spacer20"></div>
+
+                {# row 2 headings #}
+                <div class="row">
+                    {% for month in row_2_months %}
+                        <div class="col-md-4 month center">
+                            {{ month.1 }}
+                        </div>
+                    {% endfor %}
+                </div>
+
+                {# row 2 weeks #}
+                <div class="row">
+                    {% for month in row_2_months %}            
+                        <div class="col-md-4 week_block center">
+                        {% for week in row_weeks %}
+                            <div class="week">
+                                {{ week }}
+                            </div>
+                        {% endfor %}
+                        </div>
+                    {% endfor %}    
+                </div>
+
+                {# row 2 classes #}
+                <div class="row row_2">
+                    {% for month in row_2_months %}
+                        <div class="col-md-4 activity_block center month_{{month.0}}">
+                        {% for week in row_weeks %}
+                            <div class="activity_display hidden cell_{{week}}">
+                            </div>
+                        {% endfor %}
+                        </div>
+                    {% endfor %}    
+                </div>
+
+                <div class="spacer20"></div>
+
+                {# row 3 headings #}
+                <div class="row">
+                    {% for month in row_3_months %}
+                        <div class="col-md-4 month center">
+                            {{ month.1 }}
+                        </div>
+                    {% endfor %}
+                </div>
+
+                {# row 3 weeks #}
+                <div class="row">
+                    {% for month in row_3_months %}            
+                        <div class="col-md-4 week_block center">
+                        {% for week in row_weeks %}
+                            <div class="week">
+                                {{ week }}
+                            </div>
+                        {% endfor %}
+                        </div>
+                    {% endfor %}    
+                </div>
+
+                {# row 3 classes #}
+                <div class="row row_3">
+                    {% for month in row_3_months %}
+                        <div class="col-md-4 activity_block center month_{{month.0}}">
+                        {% for week in row_weeks %}
+                            <div class="activity_display hidden cell_{{week}}">
+                            </div>
+                        {% endfor %}
+                        </div>
+                    {% endfor %}    
+                </div>
+
+                <div class="spacer20"></div>
+                
+                {# row 4 months #}
+                <div class="row">
+                    {% for month in row_4_months %}
+                        <div class="col-md-4 month center">
+                            {{ month.1 }}
+                        </div>
+                    {% endfor %}
+                </div>
+
+                {# row 4 weeks #}
+                <div class="row">
+                    {% for month in row_4_months %}
+                        <div class="col-md-4 week_block center">
+                        {% for week in row_weeks %}
+                            <div class="week">
+                                {{ week }}
+                            </div>
+                        {% endfor %}
+                        </div>
+                    {% endfor %}    
+                </div>
+
+                {# row 4 classes #}
+                <div class="row row_4">
+                    {% for month in row_4_months %}
+                        <div class="col-md-4 activity_block center month_{{month.0}}">
+                        {% for week in row_weeks %}
+                            <div class="activity_display hidden cell_{{week}}">
+                            </div>
+                        {% endfor %}
+                        </div>
+                    {% endfor %}    
+                </div>
+
+                <div class="spacer20"></div>
+                
+                {# row 5 months #}
+                <div class="row">
+                    {% for month in row_5_months %}
+                        <div class="col-md-4 month center">
+                            {{ month.1 }}
+                        </div>
+                    {% endfor %}
+                </div>
+
+                {# row 5 weeks #}
+                <div class="row">
+                    {% for month in row_5_months %}
+                        <div class="col-md-4 week_block center">
+                        {% for week in row_weeks %}
+                            <div class="week">
+                                {{ week }}
+                            </div>
+                        {% endfor %}
+                        </div>
+                    {% endfor %}    
+                </div>
+
+                {# row 5 classes #}
+                <div class="row row_5">
+                    {% for month in row_5_months %}
+                        <div class="col-md-4 activity_block center month_{{month.0}}">
+                        {% for week in row_weeks %}
+                            <div class="activity_display hidden cell_{{week}}">
+                            </div>
+                        {% endfor %}
+                        </div>
+                    {% endfor %}    
+                </div>
+            </div>
+
+            <div class="content-mobile">
+                {# row 1 months #}
+                
+                {% for month in row_1_months %}
+                    <div class="row">
+                        <div class="col-md-4 month center">
+                            {{ month.1 }}
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-4 week_block center">
+                        {% for week in row_weeks %}
+                            <div class="week">
+                                {{ week }}
+                            </div>
+                        {% endfor %}
+                        </div>
+                    </div>
+                    <div class="row row_1">
+                        <div class="col-md-4 activity_block center month_{{month.0}}">
+                            {% for week in row_weeks %}
+                                <div class="activity_display hidden cell_{{week}}">
+                                </div> 
+                            {% endfor %}
+                        </div>
+                    </div>
+                    <div class="spacer20"></div>
+                {% endfor %}
+
+                {% for month in row_2_months %}
+                    <div class="row">
+                        <div class="col-md-4 month center">
+                            {{ month.1 }}
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-4 week_block center">
+                        {% for week in row_weeks %}
+                            <div class="week">
+                                {{ week }}
+                            </div>
+                        {% endfor %}
+                        </div>
+                    </div>
+                    <div class="row row_2">
+                        <div class="col-md-4 activity_block center month_{{month.0}}">
+                            {% for week in row_weeks %}
+                                <div class="activity_display hidden cell_{{week}}">
+                                </div> 
+                            {% endfor %}
+                        </div>
+                    </div>
+                    <div class="spacer20"></div>
+                {% endfor %}
+
+                {% for month in row_3_months %}
+                    <div class="row">
+                        <div class="col-md-4 month center">
+                            {{ month.1 }}
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-4 week_block center">
+                        {% for week in row_weeks %}
+                            <div class="week">
+                                {{ week }}
+                            </div>
+                        {% endfor %}
+                        </div>
+                    </div>
+                    <div class="row row_3">
+                        <div class="col-md-4 activity_block center month_{{month.0}}">
+                            {% for week in row_weeks %}
+                                <div class="activity_display hidden cell_{{week}}">
+                                </div> 
+                            {% endfor %}
+                        </div>
+                    </div>
+                    <div class="spacer20"></div>
+                {% endfor %}
+
+                {% for month in row_4_months %}
+                    <div class="row">
+                        <div class="col-md-4 month center">
+                            {{ month.1 }}
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-4 week_block center">
+                        {% for week in row_weeks %}
+                            <div class="week">
+                                {{ week }}
+                            </div>
+                        {% endfor %}
+                        </div>
+                    </div>
+                    <div class="row row_4">
+                        <div class="col-md-4 activity_block center month_{{month.0}}">
+                            {% for week in row_weeks %}
+                                <div class="activity_display hidden cell_{{week}}">
+                                </div> 
+                            {% endfor %}
+                        </div>
+                    </div>
+                    <div class="spacer20"></div>
+                {% endfor %}
+
+                {% for month in row_5_months %}
+                    <div class="row">
+                        <div class="col-md-4 month center">
+                            {{ month.1 }}
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-4 week_block center">
+                        {% for week in row_weeks %}
+                            <div class="week">
+                                {{ week }}
+                            </div>
+                        {% endfor %}
+                        </div>
+                    </div>
+                    <div class="row row_5">
+                        <div class="col-md-4 activity_block center month_{{month.0}}">
+                            {% for week in row_weeks %}
+                                <div class="activity_display hidden cell_{{week}}">
+                                </div> 
+                            {% endfor %}
+                        </div>
+                    </div>
+                    {% if month.0 != 3 %}
+                        <div class="spacer20"></div>
+                    {% endif %}
+                {% endfor %}
+
+            </div> 
+        </div>
+
+        {# next, prev navigation #}
+        <div class="row content-desktop">
+            <div class="col-md-3">
+                <a role="button" class="btn btn-secondary filter_program txt-w">Filter Schedules</a>
+            </div>
+            <div class="col-md-2">
+                <a href="#" class="prev_program">&larr; Previous</a>
+            </div>
+            <div class="col-md-2 center no-side-pd">
+                <span class="program_index"></span>
+            </div>
+            <div class="col-md-2 right">
+                <a href="#" class="next_program">Next &rarr;</a>
+            </div>
+            <div class="col-md-3">
+                <a role="button" class="btn btn-secondary copy_program txt-w">Copy Schedule</a>
+            </div>
+        </div>
+
+        {# next, prev navigation #}
+        <div class="content-mobile">
+            <div class="row">
+                <div class="col-md-12 center">
+                    <a href="#" class="prev_program float-l">&larr; Previous</a>
+                    <span class="program_index">&nbsp;</span>
+                    <a href="#" class="next_program float-r">Next &rarr;</a>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-6 flex-center">
+                    <a role="button" class="btn btn-secondary filter_program txt-w mt-3">Filter Schedule</a>
+                </div>
+                <div class="col-md-6 flex-center">
+                    <a role="button" class="btn btn-secondary copy_program txt-w mt-3">Copy Schedule</a>
+                </div>
+            </div>
+        </div>
+
+        <div class="spacer20"></div>
+        <hr>
+        <div class="spacer20"></div>
+
+        {# import/export activities #}
+        <div class="container">
+            <div class="row import-export">
+                <div class="col-md-12 mb-4">
+                    <a role="button" id="export_acts" class="btn btn-secondary txt-w">Export</a>
+                    <a role="button" id="import_acts" class="btn btn-secondary txt-w ml-5">Import</a>
+                    <input type="file" class="hidden" id="file_input" />
+                </div>
+            </div>
+        </div>
+
+        {# data entry section #}
+        <div class="container">
+            {# section headings #}
+            <div class="row activity_header content-desktop">
+                <div class="col-md-1 mb-2">
+                    <h5>Code</h5>
+                </div>
+                <div class="col-md-3 mb-2">
+                    <h5>Name</h5>
+                </div>
+                <div class="col-md-2 mb-2">
+                    <h5>Category</h5>
+                </div>
+                <div class="col-md-2 mb-2">
+                    <h5>Start weeks</h5>
+                </div>
+                <div class="col-md-2 mb-2">
+                    <h5></h5>
+                </div>
+                <div class="col-md-2 mb-2">
+                    <h5>Length</h5>
+                </div>
+            </div>
+
+            {# data inputs #}
+            <div class="activity">
+                <div class="row">
+                    <div class="col-md-1 mb-4">
+                        <span class="txt-gold content-mobile">
+                            <h5>Code</h5>
+                            <a href="#" class="close remove_activity top-right hidden">&times;</a>
+                        </span>
+                        <input type="text" class="act_code form-control w-100-pc">
+                    </div>
+                    <div class="col-md-3 mb-4">
+                        <span class="txt-gold content-mobile">
+                            <h5>Name</h5>
+                        </span>
+                        <input type="text" class="act_name form-control w-100-pc">
+                    </div>
+                    <div class="col-md-2 mb-4">
+                        <span class="txt-gold content-mobile">
+                            <h5>Category</h5>
+                        </span>
+                        <select class="act_category form-control w-100-pc">
+                            <option value="" disabled selected>Select...</option>
+                            <option value="Class">Class</option>
+                            <option value="Rotation">Rotation</option>
+                            <option value="Custom">Custom</option>
+                        </select>
+                    </div>
+                    <div class="col-md-2 mb-4">
+                        <span class="txt-gold content-mobile">
+                            <h5>Start weeks</h5>
+                        </span>
+                        <div class="multi_select content-desktop"> 
+                            <div class="select_box">
+                                <select class="form-control">
+                                    <option value="" class="hidden" disabled selected>Select...</option>
+                                </select>
+                            </div>
+                            <div class="multi_options">
+                                {% for week in all_weeks %}
+                                    <label class="check_label">
+                                        <input type="checkbox" value="{{ week }}" />
+                                        <span class="checkmark"></span>
+                                        {{ week }}
+                                    </label>
+                                {% endfor %}
+                            </div>
+                        </div>
+                        <select class="act_slot_selector form-control content-mobile" multiple>
+                            {% for week in all_weeks %}
+                                <option value="{{ week }}">{{ week }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="col-md-2 mb-4">
+                        <textarea class="form-control selected_slots" disabled></textarea>
+                    </div>
+                    <div class="col-md-2 mb-4">
+                        <span class="txt-gold content-mobile">
+                            <h5>Length</h5>
+                        </span>
+                        <select class="act_length form-control">
+                            <option value="" disabled selected>Select...</option>
+                            <option value="1">1</option>
+                            <option value="2">2</option>
+                            <option value="3">3</option>
+                            <option value="4">4</option>
+                            <option value="5">5</option>
+                            <option value="6">6</option>
+                            <option value="7">7</option>
+                            <option value="8">8</option>
+                        </select>
+                        <a href="#" class="close remove_activity content-desktop hidden">&times;</a>
+                    </div>            
+                </div>
+            </div>
+
+            {# add line #}
+            <div class="row add_link">
+                <div class="col-md-0">
+                    <a href="#" id="add_activity">&plus; Add another</a>
+                </div>
+            </div>
+        </div>
+
+        <div class="spacer20"></div>
+
+        {# generate schedules #}
+        <div class="row">
+            <div class="col-md-12 center">
+                {% csrf_token %}
+                <a role="button" class="btn btn-primary txt-w" id="generate">Generate Schedules</a>
+            </div>
+        </div>
+
+        <div class="spacer50"></div>
+
+        <div class="loading style-2 hidden"><div class="loading-wheel"></div></div>
+
+    </main>
+
+    {# footer #}
+       <footer class="page-footer font-small lighten-5 pt-0 bg-light-gray">
+
+        <div class="bg-teal">
+            <div class="container">
+                <div class="row py-4 d-flex align-items-center">
+                </div>
+            </div>
+        </div>
+
+        <!--Footer Links-->
+        <div class="container text-center text-md-left">
+            <div class="row mt-3">
+
+                <div class="col-md-4 mb-3 dark-grey-text">
+                    <h6 class="text-uppercase font-weight-bold">
+                        <strong>Disclaimer</strong>
+                    </h6>
+                    <hr class="teal accent-3 mb-3 mt-0 d-inline-block mx-auto w-3_7-em">
+                    <p>This application is in beta! No guarantees are made about the correctness of
+                    its outputs. Furthermore, it is not associated with or sanctioned by any 
+                    particular medical school(s). </p>
+                </div>
+
+                <div class="col-md-1"></div>
+
+                <div class="col-md-2 mb-3 dark-grey-text">
+                    <h6 class="text-uppercase font-weight-bold">
+                        <strong>Team</strong>
+                    </h6>
+                    <hr class="teal accent-3 mb-3 mt-0 d-inline-block mx-auto w-3_7-em">
+                    <p class="mb-1">Gabo Frattallone</p>
+                    <p class="mb-1">Jorge Rosario</p>
+                </div>
+
+                <div class="col-md-1"></div>
+
+                <div class="col-md-4 mb-3 dark-grey-text">
+                    <h6 class="text-uppercase font-weight-bold">
+                        <strong>Contact</strong>
+                    </h6>
+                    <hr class="teal accent-3 mb-3 mt-0 d-inline-block mx-auto w-3_7-em">
+                    <p class="mb-1">To report bugs or suggest features:</p>
+                    <a href="https://docs.google.com/forms/d/e/1FAIpQLSdjnfyYbkfnqmsk9rmgAqQXJ2p7xj7wSAyBjFNl0d2EVJQ9ow/viewform" target="_blank">Google Form</a>
+                </div>
+
+            </div>
+        </div>
+    </footer>
+
+</body>
+</html>

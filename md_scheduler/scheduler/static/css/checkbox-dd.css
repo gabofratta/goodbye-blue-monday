@@ -1,0 +1,101 @@
+/* Multi select dropdown */
+.multi_select {
+    position: relative;
+}
+
+.multi_options {
+    display: none;
+    border: 1px black solid;
+    position: absolute;
+    z-index: 1500;
+    background-color: #ffffff;
+    width: 100%;
+    overflow: auto;
+    max-height: 13em;
+    white-space: nowrap;
+    padding-top: 0.1em;
+    padding-bottom: 0.1em;
+}
+
+.multi_options label {
+    display: block;
+    margin-bottom: 0px;
+    text-indent: 0.5em;
+    padding-top: 0.05em;
+    padding-bottom: 0.05em;
+}
+
+.multi_options label:hover {
+    background-color: #1e90ff;
+    color: white;
+}
+
+.multi_options input {
+    vertical-align: middle;
+    position: relative;
+    top: -1px;
+    margin-right: 0.2em;
+}
+
+.check_label {
+  position: relative;
+  padding-left: 1em;
+  cursor: pointer;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+}
+
+/* Hide the browser's default checkbox */
+.check_label input {
+  position: absolute;
+  opacity: 0;
+  cursor: pointer;
+  display: none;
+}
+
+/* Create a custom checkbox */
+.checkmark {
+  position: absolute;
+  top: 0.5em;
+  left: 0.3em;
+  height: 0.8em;
+  width: 0.8em;
+  background-color: #eee;
+}
+
+/* On mouse-over, add a grey background color */
+.check_label:hover input ~ .checkmark {
+  background-color: #ccc;
+}
+
+/* When the checkbox is checked, add a blue background */
+.check_label input:checked ~ .checkmark {
+  background-color: #2196F3;
+}
+
+/* Create the checkmark/indicator (hidden when not checked) */
+.checkmark:after {
+  content: "";
+  position: absolute;
+  display: none;
+}
+
+/* Show the checkmark when checked */
+.check_label input:checked ~ .checkmark:after {
+  display: block;
+}
+
+/* Style the checkmark/indicator */
+.check_label .checkmark:after {
+  left: 0.25em;
+  top: 0.05em;
+  width: 0.3em;
+  height: 0.6em;
+  border: solid white;
+  border-width: 0 2px 2px 0;
+  -webkit-transform: rotate(45deg);
+  -ms-transform: rotate(45deg);
+  transform: rotate(45deg);
+}
