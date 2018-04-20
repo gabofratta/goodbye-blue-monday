@@ -121,6 +121,10 @@ USE_TZ = True
 
 STATIC_URL = '/static/'
 
+STATIC_ROOT = ''
+
+STATICFILES_STORAGE = 'django.contrib.staticfiles.storage.CachedStaticFilesStorage'
+
 STATICFILES_DIRS = [
     os.path.join(SETTINGS_PATH, "scheduler/static"),
 ]
