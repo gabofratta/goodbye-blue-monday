@@ -393,12 +393,6 @@ $(document).ready(function() {
         // close custom select
         $('.multi_options').hide();
 
-        // prevent double hit
-        if (importing.in_progress()) {
-            return false;
-        }
-        importing.start();
-
         // call hidden file uploader
         $('#file_input').click();
 
@@ -407,6 +401,12 @@ $(document).ready(function() {
 
     // hidden file uploader activation
     $('#file_input').change(function () {
+        // prevent double hit
+        if (importing.in_progress()) {
+            return false;
+        }
+        importing.start();
+
         // check if browser supports FileReader
         if (!(window.File && window.FileReader && window.FileList && window.Blob)) {
             setAlert('.alert-danger', "Your browser does not support this feature.");
@@ -818,7 +818,8 @@ $(document).ready(function() {
     // create as many new activity lines as the given count. Count >= 1.
     function addActivity(count) {
         // clone an activity line
-        var last_activity = $('.activity').last();
+        var activity_lines = $('.activity');
+        var last_activity = activity_lines.last();
         var new_activity = last_activity.clone(true);
         var activities = $();
 
@@ -844,14 +845,30 @@ $(document).ready(function() {
                 $('<div class="act_spacer spacer20"></div>').insertBefore(this).hide().slideDown(500);
             });
         });
+
+        // unhide x from first activity
+        activity_lines.first().find('.remove_activity').removeClass('hidden');
     }
 
     // remove the given activity line (jquery object)
     function removeActivity(activity) {
+        var spacer = activity.prev('.act_spacer');
+        var activities = $('.activity');
+        var first_activity = 0;
+
+        // if first activity, get next spacer
+        if (spacer.length === 0) {
+            spacer = activity.next('.act_spacer');
+            first_activity = 1;
+        }
+
+        // if one activity left, hide x
+        if (activities.length === 2) {
+            activities.eq(first_activity).find('.remove_activity').addClass('hidden');
+        }
+
         // remove activity and previous spacer smoothly
         activity.slideUp(500, function () {
-            var spacer = $(this).prev('.act_spacer');
-
             $(this).remove();
 
             spacer.slideUp(500, function () {
@@ -1275,16 +1292,21 @@ $(document).ready(function() {
 
 
     function download(filename, text) {
-        var element = document.createElement('a');
-        element.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(text));
-        element.setAttribute('download', filename);
+        if (window.navigator.msSaveBlob) { // IE
+            var blob = new Blob([text], {type:  "text/plain;charset=utf-8;"});
+            return window.navigator.msSaveBlob(blob, filename);
+        } else { // others
+            var element = document.createElement('a');
+            element.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(text));
+            element.setAttribute('download', filename);
 
-        element.style.display = 'none';
-        document.body.appendChild(element);
+            element.style.display = 'none';
+            document.body.appendChild(element);
 
-        element.click();
+            element.click();
 
-        document.body.removeChild(element);
+            document.body.removeChild(element);
+        }
     }
 
 });

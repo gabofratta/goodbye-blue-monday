@@ -8,7 +8,7 @@
     border: 1px black solid;
     position: absolute;
     z-index: 1500;
-    background-color: #ffff;
+    background-color: #ffffff;
     width: 100%;
     overflow: auto;
     max-height: 13em;
