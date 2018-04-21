@@ -472,8 +472,11 @@ $(document).ready(function() {
         // close custom select
         $('.multi_options').hide();
 
+        // check if only one activity line will be left
+        var one_left = ($('.activity').length == 2);
+
         // remove current activity line smoothly
-        removeActivity($(this).closest('.activity'));
+        removeActivity($(this).closest('.activity'), one_left);
 
         return false;
     });
@@ -826,7 +829,8 @@ $(document).ready(function() {
     }
 
     // remove the given activity line (jquery object)
-    function removeActivity(activity) {
+    // one_left expects a boolean indicating whether only one activity will be left
+    function removeActivity(activity, one_left) {
         var spacer = activity.prev('.act_spacer');
         var activities = $('.activity');
         var first_activity = 0;
@@ -838,7 +842,7 @@ $(document).ready(function() {
         }
 
         // if one activity left, hide x
-        if (activities.length === 2) {
+        if (one_left) {
             activities.eq(first_activity).find('.remove_activity').addClass('hidden');
         }
 
@@ -976,9 +980,13 @@ $(document).ready(function() {
             activity_line.find('.selected_slots').val(slots.join("\n"));
         }
 
+        // check if only one line will be left
+        var one_left = (size <= 1);
+
         // remove any extra activities smoothly
         for (var i = (activity_lines.length - 1); i >= Math.max(size, 1); i--) {
-            removeActivity(activity_lines.eq(i));
+            removeActivity(activity_lines.eq(i), one_left);
+            one_left = false;
         }
     }
 
@@ -986,6 +994,7 @@ $(document).ready(function() {
     function resetActivities() {
         var activities = $('.activity');
         var activity = activities.first();
+        var one_left = true;
 
         // clear all info on the first activity
         activity.find("input[type='text']").val('');
@@ -996,7 +1005,8 @@ $(document).ready(function() {
 
         // remove all activities after the first
         for (var i = 1; i < activities.length; i++) {
-            removeActivity(activities.eq(i));
+            removeActivity(activities.eq(i), one_left);
+            one_left = false;
         }
     }
 
