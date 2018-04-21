@@ -40,6 +40,12 @@ function makeSlotConverter() {
     }
 }
 
+// return empty itineraries object
+function getVoidItineraries() {
+    return {"size" : 0, "itineraries" : [], "activity_names" : [], "activity_slots" : {},
+            "activity_lengths" : {}, "activity_slot_itineraries" : {}}
+}
+
 // build an itineraries object
 function buildItineraries(data) {
     var count = data.size;
@@ -47,48 +53,12 @@ function buildItineraries(data) {
     var itineraries = data.itineraries;
 
     var filtered_count = count;
-    var filtered_itineraries = [];
+    var filtered_itineraries = deepCopy(itineraries);
 
-    // array of activity names
-    var activity_names = [];
-    // map of start slots for each activity name
-    var activity_slots = {};
-    // map of length for each activity name
-    var activity_lengths = {};
-    // map of activity name to start slots to itineraries in which they are used
-    var activity_slot_itineraries = {};
-
-    // iterate over itineraries
-    for (var i = 0; i < count; i++) {
-        
-        // iterate over activities
-        for (var j = 0; j < itineraries[i].length; j++) {
-            var activity = itineraries[i][j];
-
-            // if new activity, initialize objects/arrays
-            if (activity_slots[activity.name] === undefined) {
-                activity_names.push(activity.name);
-                activity_slots[activity.name] = [];
-                activity_lengths[activity.name] = activity.length;
-                activity_slot_itineraries[activity.name] = {};
-            }
-
-            // if new slot, initialize objects/arrays
-            if (activity_slot_itineraries[activity.name][activity.slots[0]] === undefined) {
-                activity_slot_itineraries[activity.name][activity.slots[0]] = [i];
-                activity_slots[activity.name].push(activity.slots[0]);
-            } else {
-                activity_slot_itineraries[activity.name][activity.slots[0]].push(i);
-            }
-        }
-
-        // if last itinerary, sort slots for every activity
-        if (i == (count - 1)) {
-            activity_slots[activity.name].sort(function(a, b) { return a - b; });
-        }
-    }
-
-    filtered_itineraries = deepCopy(itineraries); // initially, no filter
+    var activity_names = data.activity_names;
+    var activity_slots = data.activity_slots;
+    var activity_lengths = data.activity_lengths;
+    var activity_slot_itineraries = data.activity_slot_itineraries;
 
     return {
         get_count: function() {
@@ -174,7 +144,7 @@ $(document).ready(function() {
     var filtering = makeStateFlag(); // filtering schedule flag
 
     // itineraries object, always check count before using
-    var itineraries = buildItineraries({"size" : 0, "itineraries" : []});
+    var itineraries = buildItineraries(getVoidItineraries());
 
     // time slot id to text lookup
     var slot_converter = makeSlotConverter();
@@ -224,7 +194,7 @@ $(document).ready(function() {
             } else {
                 // clear activities and itinerary
                 resetActivities();
-                itineraries = buildItineraries({"size" : 0, "itineraries" : []});
+                itineraries = buildItineraries(getVoidItineraries());
                 showItinerary(false);
             }
         }
@@ -616,44 +586,49 @@ $(document).ready(function() {
         // show loading overlay
         $('.loading').removeClass('hidden');
 
-        itineraries.reset_filter(); // reset filter
-        var remove_list = [];
-        var remove_map = {};
-        
-        // for each activity
-        $('.f_activity').each(function (index) {
-            var unselected = $(this).find('.f_act_slot_selector option:not(:selected)');
-            var activity = $(this).find('.f_act_name').text();
+        // delay calculations, so that loading screen shows
+        setTimeout(function() {
+            // reset filter status
+            itineraries.reset_filter();
+            var remove_list = [];
+            var remove_map = {};
             
-            // for each unselected slot
-            unselected.each(function (i) {
-                var slot_id = slot_converter.text_to_id($(this).val());
-                var itinerary_ids = itineraries.get_itineraries_for(activity, slot_id);
-                
-                // for each pertinent itinerary
-                for (var i = 0; i < itinerary_ids.length; i++) {
-                    // if itinerary not set for removal, set it now
-                    if (remove_map[itinerary_ids[i]] === undefined) {
-                        remove_map[itinerary_ids[i]] = true;
-                        remove_list.push(itinerary_ids[i]);
+            // for each activity
+            $('.f_activity').each(function (index) {
+                var unselected = $(this).find('.f_act_slot_selector option:not(:selected)');
+                var activity = $(this).find('.f_act_name').text();
+
+                // for each unselected slot
+                unselected.each(function (i) {
+                    var slot_id = slot_converter.text_to_id($(this).val());
+                    var itinerary_ids = itineraries.get_itineraries_for(activity, slot_id);
+                    
+                    // for each pertinent itinerary
+                    for (var i = 0; i < itinerary_ids.length; i++) {
+                        // if itinerary not set for removal, set it now
+                        if (remove_map[itinerary_ids[i]] === undefined) {
+                            remove_map[itinerary_ids[i]] = true;
+                            remove_list.push(itinerary_ids[i]);
+                        }
                     }
-                }
+                });
             });
-        });
 
-        itineraries.filter_out(remove_list); // filter itineraries
-        showItinerary(false); // update schedule table
+            itineraries.filter_out(remove_list); // filter itineraries
+            showItinerary(false); // update schedule table
 
-        // hide loader
-        $('.loading').addClass('hidden');
+            // hide loader
+            $('.loading').addClass('hidden');
 
-        // hide filter pane
-        closeFilterPane();
+            // hide filter pane
+            closeFilterPane();
 
-        // success message
-        setAlert('.alert-success', "Schedules filtered successfully.");
+            // success message
+            setAlert('.alert-success', "Schedules filtered successfully.");
 
-        filtering.stop();
+            filtering.stop();
+        }, 50);
+
         return false;
     });
 
@@ -695,7 +670,7 @@ $(document).ready(function() {
         $('.alert-success').fadeOut();
 
         // reset itineraries
-        itineraries = buildItineraries({"size" : 0, "itineraries" : []});
+        itineraries = buildItineraries(getVoidItineraries());
 
         // reset program panel
         $('.program_index').html('&nbsp;');
