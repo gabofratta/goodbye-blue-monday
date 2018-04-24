@@ -404,7 +404,7 @@ $(document).ready(function() {
         }
 
         // check file size
-        if (file.size = 0 || file.size > 2000) {
+        if (file.size = 0 || file.size > 5000) {
             setAlert('.alert-danger', "Invalid file size.");
             $(this).val('');
             importing.stop();
